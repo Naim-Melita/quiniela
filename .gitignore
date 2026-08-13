@@ -49,3 +49,6 @@ app.*.map.json
 /android/local.properties
 /android/.gradle/
 /android/.kotlin/
+
+# Configuracion local de Claude Code
+.claude/
