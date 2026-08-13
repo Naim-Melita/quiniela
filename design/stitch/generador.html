@@ -1,0 +1,499 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="es"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Quiniela - Generador y Diccionario de Sueños</title>
+<!-- Tailwind -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<!-- Custom Config -->
+<script id="tailwind-config">
+        tailwind.config = {
+          darkMode: "class",
+          theme: {
+            extend: {
+              "colors": {
+                      "secondary-fixed-dim": "#4edea3",
+                      "on-tertiary-fixed": "#2a1700",
+                      "primary": "#bec6e0",
+                      "primary-fixed-dim": "#bec6e0",
+                      "outline-variant": "#45464d",
+                      "error": "#ffb4ab",
+                      "on-tertiary": "#472a00",
+                      "surface-dim": "#051424",
+                      "surface-variant": "#273647",
+                      "on-primary-container": "#798098",
+                      "on-primary": "#283044",
+                      "on-surface": "#d4e4fa",
+                      "on-tertiary-container": "#b47300",
+                      "surface-container-highest": "#273647",
+                      "surface-bright": "#2c3a4c",
+                      "inverse-surface": "#d4e4fa",
+                      "surface-container-lowest": "#010f1f",
+                      "on-background": "#d4e4fa",
+                      "on-secondary-fixed": "#002113",
+                      "on-error-container": "#ffdad6",
+                      "outline": "#909097",
+                      "background": "#051424",
+                      "on-secondary-fixed-variant": "#005236",
+                      "secondary": "#4edea3",
+                      "surface-tint": "#bec6e0",
+                      "on-primary-fixed-variant": "#3f465c",
+                      "on-secondary-container": "#00311f",
+                      "secondary-fixed": "#6ffbbe",
+                      "surface": "#051424",
+                      "surface-container-high": "#1c2b3c",
+                      "tertiary": "#ffb95f",
+                      "on-secondary": "#003824",
+                      "tertiary-container": "#251400",
+                      "secondary-container": "#00a572",
+                      "primary-fixed": "#dae2fd",
+                      "on-error": "#690005",
+                      "inverse-on-surface": "#233143",
+                      "surface-container": "#122131",
+                      "surface-container-low": "#0d1c2d",
+                      "on-surface-variant": "#c6c6cd",
+                      "error-container": "#93000a",
+                      "on-tertiary-fixed-variant": "#653e00",
+                      "inverse-primary": "#565e74",
+                      "primary-container": "#0f172a",
+                      "tertiary-fixed-dim": "#ffb95f",
+                      "tertiary-fixed": "#ffddb8",
+                      "on-primary-fixed": "#131b2e"
+              },
+              "borderRadius": {
+                      "DEFAULT": "0.25rem",
+                      "lg": "0.5rem",
+                      "xl": "0.75rem",
+                      "full": "9999px"
+              },
+              "spacing": {
+                      "lg": "24px",
+                      "md": "16px",
+                      "base": "4px",
+                      "xs": "8px",
+                      "xl": "40px",
+                      "container-margin": "16px",
+                      "gutter": "12px",
+                      "sm": "12px"
+              },
+              "fontFamily": {
+                      "body-sm": ["Inter", "sans-serif"],
+                      "headline-lg-mobile": ["Inter", "sans-serif"],
+                      "body-lg": ["Inter", "sans-serif"],
+                      "headline-md": ["Inter", "sans-serif"],
+                      "label-caps": ["Inter", "sans-serif"],
+                      "display-lg": ["Inter", "sans-serif"],
+                      "data-display": ["JetBrains Mono", "monospace"],
+                      "headline-lg": ["Inter", "sans-serif"]
+              },
+              "fontSize": {
+                      "body-sm": ["14px", { "lineHeight": "20px", "fontWeight": "400" }],
+                      "headline-lg-mobile": ["24px", { "lineHeight": "32px", "fontWeight": "700" }],
+                      "body-lg": ["16px", { "lineHeight": "24px", "fontWeight": "400" }],
+                      "headline-md": ["20px", { "lineHeight": "28px", "fontWeight": "600" }],
+                      "label-caps": ["12px", { "lineHeight": "16px", "fontWeight": "700" }],
+                      "display-lg": ["48px", { "lineHeight": "56px", "letterSpacing": "-0.02em", "fontWeight": "800" }],
+                      "data-display": ["18px", { "lineHeight": "24px", "letterSpacing": "0.05em", "fontWeight": "700" }],
+                      "headline-lg": ["32px", { "lineHeight": "40px", "fontWeight": "700" }]
+              }
+            }
+          }
+        }
+    </script>
+<!-- Material Icons -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&amp;family=JetBrains+Mono:wght@700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<style>
+        body { font-family: 'Inter', sans-serif; }
+        .font-data-display { font-family: 'JetBrains Mono', monospace; }
+        
+        /* Custom Animations */
+        @keyframes spinPulse {
+            0% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.4); }
+            70% { box-shadow: 0 0 0 15px rgba(16, 185, 129, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
+        }
+        .btn-spin-active { animation: spinPulse 1.5s infinite; }
+        
+        @keyframes numberSpin {
+            0% { transform: translateY(-100%); opacity: 0; }
+            50% { opacity: 1; }
+            100% { transform: translateY(100%); opacity: 0; }
+        }
+        .number-spinning span { animation: numberSpin 0.15s infinite linear; }
+        
+        /* Glassmorphism utils */
+        .glass-panel {
+            background: rgba(39, 54, 71, 0.6);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+        
+        /* Ambient Green Shadow */
+        .shadow-ambient-green {
+            box-shadow: 0 8px 32px -8px rgba(16, 185, 129, 0.3);
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background text-on-surface min-h-screen flex flex-col pt-16 pb-24 md:pb-0 overflow-x-hidden">
+<!-- TopAppBar -->
+<header class="fixed top-0 left-0 w-full z-50 bg-surface-dim border-b border-outline-variant/30 transition-transform duration-300" id="topAppBar">
+<div class="flex justify-between items-center w-full px-container-margin py-xs max-w-7xl mx-auto h-[64px]">
+<!-- Leading (Avatar) -->
+<div class="flex items-center gap-sm cursor-pointer hover:bg-surface-variant p-2 rounded-full transition-colors group">
+<div class="w-8 h-8 rounded-full bg-surface-container-high border border-outline flex items-center justify-center overflow-hidden">
+<img alt="User Avatar" class="w-full h-full object-cover group-hover:scale-110 transition-transform" data-alt="A stylized, modern geometric avatar for a high-end corporate application, using deep navy blue, pristine white, and emerald green accents. Professional, sleek, and slightly abstract." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCTNXrEWKTgKFCT9SlsW4ezIiDAcqcnUfi3rXAFFwXW_RlKg_sB657t1x9Jetb5tvUHnl088ZfVgWO7ytme9aqeL_3eg7EUN098twtM5HSAk7EB5FDIIgJYCaznUVtDXyPSjCt-QuljI3Woum3DwOvrQP4XdJ8JkqOneOwVRBWX7j5-jEs9IZsdyVNTzPaHwt0EGQPFGzTDOZn1C_d0Xq6oNG4EWzBwAUDOeV9TCb8dN-o9S2N0X1g3iw"/>
+</div>
+</div>
+<!-- Headline / Brand -->
+<h1 class="text-headline-md font-headline-md font-bold text-primary tracking-tight">
+                Quiniela
+            </h1>
+<!-- Trailing (Icon) -->
+<button aria-label="Notifications" class="w-10 h-10 rounded-full flex items-center justify-center text-on-surface-variant hover:text-on-surface hover:bg-surface-variant transition-colors relative">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 0;">notifications</span>
+<span class="absolute top-2 right-2.5 w-2 h-2 bg-secondary rounded-full"></span>
+</button>
+</div>
+</header>
+<!-- Main Content Canvas -->
+<main class="flex-grow w-full max-w-7xl mx-auto px-container-margin py-lg flex flex-col gap-lg md:gap-xl">
+<!-- Header Section -->
+<div class="flex flex-col gap-xs text-center md:text-left mb-2 mt-4">
+<h2 class="text-headline-lg-mobile md:text-headline-lg font-headline-lg-mobile md:font-headline-lg text-on-surface">
+                Generador de Suerte
+            </h2>
+<p class="text-body-lg font-body-lg text-on-surface-variant max-w-2xl">
+                Prueba tu intuición. Genera números al azar o busca significados en tus sueños para armar tu próxima jugada.
+            </p>
+</div>
+<!-- Bento Grid Layout for Main Interactive Tools -->
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-gutter md:gap-md items-start">
+<!-- Generator Card (Spans 8 cols on desktop) -->
+<section class="glass-panel rounded-xl lg:col-span-7 flex flex-col p-md md:p-lg relative overflow-hidden shadow-ambient-green border-t border-t-white/10">
+<!-- Background decorative elements -->
+<div class="absolute top-0 right-0 -mr-20 -mt-20 w-64 h-64 bg-secondary/10 rounded-full blur-3xl pointer-events-none"></div>
+<div class="absolute bottom-0 left-0 -ml-10 -mb-10 w-40 h-40 bg-tertiary/10 rounded-full blur-2xl pointer-events-none"></div>
+<div class="flex justify-between items-center mb-lg relative z-10">
+<h3 class="text-headline-md font-headline-md text-on-surface flex items-center gap-xs">
+<span class="material-symbols-outlined text-secondary" style="font-variation-settings: 'FILL' 1;">casino</span>
+                        Generador
+                    </h3>
+<!-- Segmented Control for Digits -->
+<div class="flex bg-surface-container-highest p-1 rounded-lg border border-outline-variant/50">
+<button class="px-3 py-1 rounded text-label-caps font-label-caps bg-surface-variant text-on-surface transition-colors" data-digits="2" onclick="setDigits(2)">2C</button>
+<button class="px-3 py-1 rounded text-label-caps font-label-caps text-on-surface-variant hover:text-on-surface transition-colors" data-digits="3" onclick="setDigits(3)">3C</button>
+<button class="px-3 py-1 rounded text-label-caps font-label-caps text-on-surface-variant hover:text-on-surface transition-colors" data-digits="4" onclick="setDigits(4)">4C</button>
+</div>
+</div>
+<!-- Number Display Area -->
+<div class="flex-grow flex flex-col items-center justify-center py-xl relative z-10 min-h-[220px]">
+<div class="flex gap-xs md:gap-sm" id="numberDisplay">
+<!-- Number slots generated by JS -->
+<div class="w-16 h-20 md:w-20 md:h-24 bg-surface-container-lowest border border-outline-variant rounded-lg flex items-center justify-center overflow-hidden shadow-inner relative">
+<span class="text-display-lg font-display-lg text-primary-fixed-dim absolute font-data-display">0</span>
+</div>
+<div class="w-16 h-20 md:w-20 md:h-24 bg-surface-container-lowest border border-outline-variant rounded-lg flex items-center justify-center overflow-hidden shadow-inner relative">
+<span class="text-display-lg font-display-lg text-primary-fixed-dim absolute font-data-display">0</span>
+</div>
+</div>
+</div>
+<!-- Action Bar -->
+<div class="flex justify-center mt-auto relative z-10">
+<button class="bg-secondary-container hover:bg-[#00b87f] text-on-secondary-container px-xl py-3 rounded-full font-headline-md text-headline-md flex items-center gap-sm shadow-[0_0_20px_rgba(0,165,114,0.3)] transition-all active:scale-95 group" id="btnGenerate">
+<span class="material-symbols-outlined group-hover:rotate-180 transition-transform duration-500">autorenew</span>
+                        Generar
+                    </button>
+</div>
+</section>
+<!-- Dream Dictionary (Spans 5 cols on desktop) -->
+<section class="bg-surface-container-high rounded-xl lg:col-span-5 p-md md:p-lg border border-outline-variant/30 flex flex-col h-full">
+<div class="flex items-center gap-xs mb-sm">
+<span class="material-symbols-outlined text-tertiary" style="font-variation-settings: 'FILL' 1;">menu_book</span>
+<h3 class="text-headline-md font-headline-md text-on-surface">Diccionario de Sueños</h3>
+</div>
+<p class="text-body-sm font-body-sm text-on-surface-variant mb-md">Busca palabras clave de tu sueño para descubrir tu número de la suerte asociado.</p>
+<!-- Search Input -->
+<div class="relative mb-lg">
+<div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+<span class="material-symbols-outlined text-outline">search</span>
+</div>
+<input class="block w-full pl-10 pr-3 py-3 border border-outline-variant rounded-lg leading-5 bg-surface-container-highest text-on-surface placeholder-on-surface-variant focus:outline-none focus:ring-1 focus:ring-secondary focus:border-secondary sm:text-body-lg font-body-lg transition-colors" id="dreamSearch" placeholder="Ej: Perro, Agua, Sangre..." type="text"/>
+<button class="absolute inset-y-0 right-0 pr-3 flex items-center hidden text-on-surface-variant hover:text-on-surface" id="clearSearch">
+<span class="material-symbols-outlined text-sm">close</span>
+</button>
+</div>
+<!-- Search Results / Suggestion State -->
+<div class="flex-grow bg-surface-container rounded-lg p-sm border border-outline-variant/20 overflow-y-auto max-h-[250px] custom-scrollbar">
+<!-- Default Suggestions -->
+<div class="flex flex-col gap-2" id="dreamDefaultList">
+<h4 class="text-label-caps font-label-caps text-on-surface-variant px-2 mb-1">Populares</h4>
+<div class="flex justify-between items-center p-2 hover:bg-surface-variant rounded cursor-pointer transition-colors group">
+<span class="text-body-lg font-body-lg text-on-surface group-hover:text-secondary transition-colors">Agua</span>
+<span class="bg-surface-bright border border-outline-variant text-secondary-fixed-dim px-2 py-1 rounded text-label-caps font-label-caps font-data-display shadow-sm">01</span>
+</div>
+<div class="flex justify-between items-center p-2 hover:bg-surface-variant rounded cursor-pointer transition-colors group">
+<span class="text-body-lg font-body-lg text-on-surface group-hover:text-secondary transition-colors">Niño</span>
+<span class="bg-surface-bright border border-outline-variant text-secondary-fixed-dim px-2 py-1 rounded text-label-caps font-label-caps font-data-display shadow-sm">02</span>
+</div>
+<div class="flex justify-between items-center p-2 hover:bg-surface-variant rounded cursor-pointer transition-colors group">
+<span class="text-body-lg font-body-lg text-on-surface group-hover:text-secondary transition-colors">Cama</span>
+<span class="bg-surface-bright border border-outline-variant text-secondary-fixed-dim px-2 py-1 rounded text-label-caps font-label-caps font-data-display shadow-sm">04</span>
+</div>
+<div class="flex justify-between items-center p-2 hover:bg-surface-variant rounded cursor-pointer transition-colors group">
+<span class="text-body-lg font-body-lg text-on-surface group-hover:text-secondary transition-colors">Perro</span>
+<span class="bg-surface-bright border border-outline-variant text-secondary-fixed-dim px-2 py-1 rounded text-label-caps font-label-caps font-data-display shadow-sm">06</span>
+</div>
+<div class="flex justify-between items-center p-2 hover:bg-surface-variant rounded cursor-pointer transition-colors group">
+<span class="text-body-lg font-body-lg text-on-surface group-hover:text-secondary transition-colors">Revolver</span>
+<span class="bg-surface-bright border border-outline-variant text-secondary-fixed-dim px-2 py-1 rounded text-label-caps font-label-caps font-data-display shadow-sm">07</span>
+</div>
+</div>
+<!-- Search Results (Hidden by default) -->
+<div class="hidden flex-col gap-2" id="dreamSearchResults">
+<!-- Populated by JS -->
+</div>
+<!-- Empty State (Hidden by default) -->
+<div class="hidden flex-col items-center justify-center py-lg opacity-60" id="dreamEmptyState">
+<span class="material-symbols-outlined text-4xl mb-2">search_off</span>
+<p class="text-body-sm font-body-sm text-center">No se encontró significado.<br/>Intenta con otra palabra.</p>
+</div>
+</div>
+</section>
+</div>
+</main>
+<!-- BottomNavBar (Hidden on desktop, fixed bottom on mobile) -->
+<nav class="fixed bottom-0 left-0 w-full z-50 flex justify-around items-center px-4 pb-4 pt-2 bg-surface-container dark:bg-surface-container-highest backdrop-blur-md shadow-[0_-4px_24px_rgba(16,185,129,0.15)] rounded-t-xl border-t-0 md:hidden">
+<!-- Dashboard - Inactive -->
+<a class="flex flex-col items-center justify-center text-on-surface-variant dark:text-outline p-2 hover:text-secondary dark:hover:text-secondary-fixed transition-colors" href="#">
+<span class="material-symbols-outlined mb-1" style="font-variation-settings: 'FILL' 0;">dashboard</span>
+<span class="text-label-caps font-label-caps">Dashboard</span>
+</a>
+<!-- Results - Inactive -->
+<a class="flex flex-col items-center justify-center text-on-surface-variant dark:text-outline p-2 hover:text-secondary dark:hover:text-secondary-fixed transition-colors" href="#">
+<span class="material-symbols-outlined mb-1" style="font-variation-settings: 'FILL' 0;">history</span>
+<span class="text-label-caps font-label-caps">Results</span>
+</a>
+<!-- Generator - ACTIVE -->
+<a class="flex flex-col items-center justify-center bg-secondary-container dark:bg-on-secondary-fixed-variant text-on-secondary-container dark:text-secondary-fixed rounded-full px-4 py-1 scale-110 transition-all duration-200" href="#">
+<span class="material-symbols-outlined mb-1" style="font-variation-settings: 'FILL' 1;">casino</span>
+<span class="text-label-caps font-label-caps">Generator</span>
+</a>
+<!-- Stats - Inactive -->
+<a class="flex flex-col items-center justify-center text-on-surface-variant dark:text-outline p-2 hover:text-secondary dark:hover:text-secondary-fixed transition-colors" href="#">
+<span class="material-symbols-outlined mb-1" style="font-variation-settings: 'FILL' 0;">analytics</span>
+<span class="text-label-caps font-label-caps">Stats</span>
+</a>
+</nav>
+<!-- JavaScript for Interactions -->
+<script>
+        // --- Generator Logic ---
+        let currentDigits = 2;
+        const numberDisplayContainer = document.getElementById('numberDisplay');
+        const btnGenerate = document.getElementById('btnGenerate');
+        const segmentButtons = document.querySelectorAll('[data-digits]');
+
+        function renderSlots(count) {
+            numberDisplayContainer.innerHTML = '';
+            for (let i = 0; i < count; i++) {
+                const slot = document.createElement('div');
+                slot.className = 'w-16 h-20 md:w-20 md:h-24 bg-surface-container-lowest border border-outline-variant rounded-lg flex items-center justify-center overflow-hidden shadow-inner relative';
+                
+                const numberSpan = document.createElement('span');
+                numberSpan.className = 'text-display-lg font-display-lg text-primary-fixed-dim absolute font-data-display';
+                numberSpan.textContent = '0';
+                
+                slot.appendChild(numberSpan);
+                numberDisplayContainer.appendChild(slot);
+            }
+        }
+
+        window.setDigits = function(count) {
+            if(count === currentDigits) return;
+            currentDigits = count;
+            
+            // Update Segmented Control UI
+            segmentButtons.forEach(btn => {
+                if (parseInt(btn.getAttribute('data-digits')) === count) {
+                    btn.classList.remove('text-on-surface-variant');
+                    btn.classList.add('bg-surface-variant', 'text-on-surface');
+                } else {
+                    btn.classList.remove('bg-surface-variant', 'text-on-surface');
+                    btn.classList.add('text-on-surface-variant');
+                }
+            });
+            
+            renderSlots(count);
+        };
+
+        btnGenerate.addEventListener('click', () => {
+            if (btnGenerate.classList.contains('generating')) return;
+            
+            btnGenerate.classList.add('generating', 'btn-spin-active');
+            const slots = numberDisplayContainer.querySelectorAll('span');
+            
+            // Start spinning animation
+            slots.forEach(slot => {
+                slot.classList.add('number-spinning');
+            });
+
+            // Simulate API call / delay
+            setTimeout(() => {
+                slots.forEach((slot, index) => {
+                    setTimeout(() => {
+                        slot.classList.remove('number-spinning');
+                        slot.style.animation = 'none'; // reset
+                        slot.style.opacity = '0'; // start hidden for final pop
+                        
+                        // Generate random number 0-9
+                        const randomNum = Math.floor(Math.random() * 10);
+                        slot.textContent = randomNum;
+                        
+                        // Slight gold tint for generated state
+                        slot.classList.replace('text-primary-fixed-dim', 'text-tertiary');
+                        
+                        // Pop in animation inline
+                        requestAnimationFrame(() => {
+                            slot.style.transition = 'all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275)';
+                            slot.style.transform = 'translateY(0) scale(1.1)';
+                            slot.style.opacity = '1';
+                            
+                            setTimeout(()=> {
+                                 slot.style.transform = 'translateY(0) scale(1)';
+                            }, 150);
+                        });
+
+                    }, index * 200); // Stagger stopping
+                });
+                
+                // Cleanup button state
+                setTimeout(() => {
+                    btnGenerate.classList.remove('generating', 'btn-spin-active');
+                }, currentDigits * 200 + 300);
+
+            }, 800); // Spin duration
+        });
+
+        // Initialize with default
+        renderSlots(currentDigits);
+
+
+        // --- Dream Dictionary Logic ---
+        const searchInput = document.getElementById('dreamSearch');
+        const clearBtn = document.getElementById('clearSearch');
+        const defaultList = document.getElementById('dreamDefaultList');
+        const searchResults = document.getElementById('dreamSearchResults');
+        const emptyState = document.getElementById('dreamEmptyState');
+
+        // Mock Data
+        const dictionaryData = [
+            { word: 'Agua', num: '01' },
+            { word: 'Niño', num: '02' },
+            { word: 'San Cono', num: '03' },
+            { word: 'Cama', num: '04' },
+            { word: 'Gato', num: '05' },
+            { word: 'Perro', num: '06' },
+            { word: 'Revolver', num: '07' },
+            { word: 'Incendio', num: '08' },
+            { word: 'Arroyo', num: '09' },
+            { word: 'Leche', num: '10' },
+            { word: 'Minero', num: '11' },
+            { word: 'Soldado', num: '12' },
+            { word: 'Sangre', num: '18' },
+            { word: 'Pescado', num: '19' },
+            { word: 'Fiesta', num: '20' },
+            { word: 'Mujer', num: '21' },
+            { word: 'Loco', num: '22' },
+            { word: 'Caballo', num: '24' }
+        ];
+
+        function createResultRow(item) {
+            const div = document.createElement('div');
+            div.className = 'flex justify-between items-center p-2 hover:bg-surface-variant rounded cursor-pointer transition-colors group';
+            div.innerHTML = `
+                <span class="text-body-lg font-body-lg text-on-surface group-hover:text-secondary transition-colors">${item.word}</span>
+                <span class="bg-surface-bright border border-outline-variant text-secondary-fixed-dim px-2 py-1 rounded text-label-caps font-label-caps font-data-display shadow-sm">${item.num}</span>
+            `;
+            // Add click interaction to set generator
+            div.addEventListener('click', () => {
+                const nums = item.num.split('');
+                setDigits(2);
+                const slots = numberDisplayContainer.querySelectorAll('span');
+                slots[0].textContent = nums[0];
+                slots[1].textContent = nums[1];
+                slots.forEach(s => {
+                    s.classList.replace('text-primary-fixed-dim', 'text-tertiary');
+                    s.style.transform = 'scale(1.1)';
+                    setTimeout(()=> s.style.transform = 'scale(1)', 200);
+                });
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            });
+            return div;
+        }
+
+        searchInput.addEventListener('input', (e) => {
+            const query = e.target.value.toLowerCase().trim();
+            
+            if (query.length > 0) {
+                clearBtn.classList.remove('hidden');
+                defaultList.classList.add('hidden');
+                
+                const filtered = dictionaryData.filter(item => item.word.toLowerCase().includes(query));
+                
+                searchResults.innerHTML = '';
+                if (filtered.length > 0) {
+                    filtered.forEach(item => {
+                        searchResults.appendChild(createResultRow(item));
+                    });
+                    searchResults.classList.remove('hidden');
+                    searchResults.classList.add('flex');
+                    emptyState.classList.add('hidden');
+                    emptyState.classList.remove('flex');
+                } else {
+                    searchResults.classList.add('hidden');
+                    searchResults.classList.remove('flex');
+                    emptyState.classList.remove('hidden');
+                    emptyState.classList.add('flex');
+                }
+            } else {
+                // Reset state
+                clearBtn.classList.add('hidden');
+                defaultList.classList.remove('hidden');
+                searchResults.classList.add('hidden');
+                searchResults.classList.remove('flex');
+                emptyState.classList.add('hidden');
+                emptyState.classList.remove('flex');
+            }
+        });
+
+        clearBtn.addEventListener('click', () => {
+            searchInput.value = '';
+            searchInput.dispatchEvent(new Event('input'));
+            searchInput.focus();
+        });
+
+        // Hide App Bar on scroll down for mobile
+        let lastScrollY = window.scrollY;
+        const topAppBar = document.getElementById('topAppBar');
+        
+        window.addEventListener('scroll', () => {
+            if (window.innerWidth < 768) { // Only on mobile
+                if (window.scrollY > lastScrollY && window.scrollY > 100) {
+                    topAppBar.style.transform = 'translateY(-100%)';
+                } else {
+                    topAppBar.style.transform = 'translateY(0)';
+                }
+            }
+            lastScrollY = window.scrollY;
+        }, { passive: true });
+
+    </script>
+</body></html>

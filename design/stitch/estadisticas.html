@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Quiniela - Statistics and Trends</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&amp;family=JetBrains+Mono:wght@700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+          darkMode: "class",
+          theme: {
+            extend: {
+              "colors": {
+                      "secondary-fixed-dim": "#4edea3",
+                      "on-tertiary-fixed": "#2a1700",
+                      "primary": "#bec6e0",
+                      "primary-fixed-dim": "#bec6e0",
+                      "outline-variant": "#45464d",
+                      "error": "#ffb4ab",
+                      "on-tertiary": "#472a00",
+                      "surface-dim": "#051424",
+                      "surface-variant": "#273647",
+                      "on-primary-container": "#798098",
+                      "on-primary": "#283044",
+                      "on-surface": "#d4e4fa",
+                      "on-tertiary-container": "#b47300",
+                      "surface-container-highest": "#273647",
+                      "surface-bright": "#2c3a4c",
+                      "inverse-surface": "#d4e4fa",
+                      "surface-container-lowest": "#010f1f",
+                      "on-background": "#d4e4fa",
+                      "on-secondary-fixed": "#002113",
+                      "on-error-container": "#ffdad6",
+                      "outline": "#909097",
+                      "background": "#051424",
+                      "on-secondary-fixed-variant": "#005236",
+                      "secondary": "#4edea3",
+                      "surface-tint": "#bec6e0",
+                      "on-primary-fixed-variant": "#3f465c",
+                      "on-secondary-container": "#00311f",
+                      "secondary-fixed": "#6ffbbe",
+                      "surface": "#051424",
+                      "surface-container-high": "#1c2b3c",
+                      "tertiary": "#ffb95f",
+                      "on-secondary": "#003824",
+                      "tertiary-container": "#251400",
+                      "secondary-container": "#00a572",
+                      "primary-fixed": "#dae2fd",
+                      "on-error": "#690005",
+                      "inverse-on-surface": "#233143",
+                      "surface-container": "#122131",
+                      "surface-container-low": "#0d1c2d",
+                      "on-surface-variant": "#c6c6cd",
+                      "error-container": "#93000a",
+                      "on-tertiary-fixed-variant": "#653e00",
+                      "inverse-primary": "#565e74",
+                      "primary-container": "#0f172a",
+                      "tertiary-fixed-dim": "#ffb95f",
+                      "tertiary-fixed": "#ffddb8",
+                      "on-primary-fixed": "#131b2e"
+              },
+              "borderRadius": {
+                      "DEFAULT": "0.25rem",
+                      "lg": "0.5rem",
+                      "xl": "0.75rem",
+                      "full": "9999px"
+              },
+              "spacing": {
+                      "lg": "24px",
+                      "md": "16px",
+                      "base": "4px",
+                      "xs": "8px",
+                      "xl": "40px",
+                      "container-margin": "16px",
+                      "gutter": "12px",
+                      "sm": "12px"
+              },
+              "fontFamily": {
+                      "body-sm": [
+                              "Inter"
+                      ],
+                      "headline-lg-mobile": [
+                              "Inter"
+                      ],
+                      "body-lg": [
+                              "Inter"
+                      ],
+                      "headline-md": [
+                              "Inter"
+                      ],
+                      "label-caps": [
+                              "Inter"
+                      ],
+                      "display-lg": [
+                              "Inter"
+                      ],
+                      "data-display": [
+                              "JetBrains Mono"
+                      ],
+                      "headline-lg": [
+                              "Inter"
+                      ]
+              },
+              "fontSize": {
+                      "body-sm": [
+                              "14px",
+                              {
+                                      "lineHeight": "20px",
+                                      "fontWeight": "400"
+                              }
+                      ],
+                      "headline-lg-mobile": [
+                              "24px",
+                              {
+                                      "lineHeight": "32px",
+                                      "fontWeight": "700"
+                              }
+                      ],
+                      "body-lg": [
+                              "16px",
+                              {
+                                      "lineHeight": "24px",
+                                      "fontWeight": "400"
+                              }
+                      ],
+                      "headline-md": [
+                              "20px",
+                              {
+                                      "lineHeight": "28px",
+                                      "fontWeight": "600"
+                              }
+                      ],
+                      "label-caps": [
+                              "12px",
+                              {
+                                      "lineHeight": "16px",
+                                      "fontWeight": "700"
+                              }
+                      ],
+                      "display-lg": [
+                              "48px",
+                              {
+                                      "lineHeight": "56px",
+                                      "letterSpacing": "-0.02em",
+                                      "fontWeight": "800"
+                              }
+                      ],
+                      "data-display": [
+                              "18px",
+                              {
+                                      "lineHeight": "24px",
+                                      "letterSpacing": "0.05em",
+                                      "fontWeight": "700"
+                              }
+                      ],
+                      "headline-lg": [
+                              "32px",
+                              {
+                                      "lineHeight": "40px",
+                                      "fontWeight": "700"
+                              }
+                      ]
+              }
+      },
+          },
+        }
+      </script>
+<style>
+        .glass-card {
+            background: rgba(39, 54, 71, 0.4);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        .text-glow {
+            text-shadow: 0 0 10px rgba(78, 222, 163, 0.5);
+        }
+        .bg-glow-gold {
+            box-shadow: 0 0 24px rgba(255, 185, 95, 0.4);
+        }
+      </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background text-on-surface min-h-screen flex flex-col font-body-sm pb-24 md:pb-0">
+<!-- TopAppBar (Web & Mobile) -->
+<header class="docked full-width top-0 bg-surface-dim dark:bg-surface-dim border-b border-outline-variant flat no shadows z-50">
+<div class="flex justify-between items-center w-full px-container-margin py-xs max-w-7xl mx-auto">
+<div class="flex items-center gap-sm cursor-pointer hover:bg-surface-variant dark:hover:bg-surface-variant p-2 rounded-full transition-colors">
+<span class="material-symbols-outlined text-on-surface text-2xl">account_circle</span>
+</div>
+<h1 class="text-headline-md font-headline-md font-bold text-primary dark:text-primary-fixed-dim tracking-tight">Quiniela</h1>
+<div class="flex items-center gap-sm cursor-pointer hover:bg-surface-variant dark:hover:bg-surface-variant p-2 rounded-full transition-colors">
+<span class="material-symbols-outlined text-on-surface text-2xl">notifications</span>
+</div>
+</div>
+</header>
+<!-- Main Canvas -->
+<main class="flex-grow w-full max-w-7xl mx-auto px-container-margin py-lg md:py-xl flex flex-col gap-lg">
+<!-- Header Section -->
+<div class="flex flex-col gap-xs mb-md">
+<h2 class="text-headline-lg-mobile md:text-headline-lg font-headline-lg-mobile md:font-headline-lg text-on-surface">Statistics &amp; Trends</h2>
+<p class="text-body-lg font-body-lg text-on-surface-variant">Analyze historical data to refine your strategy.</p>
+</div>
+<!-- Desktop Navigation Shell (Hidden on Mobile) -->
+<nav class="hidden md:flex flex-row gap-lg mb-lg border-b border-outline-variant pb-xs">
+<a class="text-on-surface-variant hover:text-secondary flex items-center gap-xs pb-xs border-b-2 border-transparent transition-colors" href="#">
+<span class="material-symbols-outlined text-lg">dashboard</span>
+<span class="font-headline-md text-body-lg">Dashboard</span>
+</a>
+<a class="text-on-surface-variant hover:text-secondary flex items-center gap-xs pb-xs border-b-2 border-transparent transition-colors" href="#">
+<span class="material-symbols-outlined text-lg">history</span>
+<span class="font-headline-md text-body-lg">Results</span>
+</a>
+<a class="text-on-surface-variant hover:text-secondary flex items-center gap-xs pb-xs border-b-2 border-transparent transition-colors" href="#">
+<span class="material-symbols-outlined text-lg">casino</span>
+<span class="font-headline-md text-body-lg">Generator</span>
+</a>
+<a class="text-on-surface text-glow border-b-2 border-secondary flex items-center gap-xs pb-xs transition-colors" href="#">
+<span class="material-symbols-outlined text-lg">analytics</span>
+<span class="font-headline-md text-body-lg">Stats</span>
+</a>
+</nav>
+<!-- Bento Grid Layout -->
+<div class="grid grid-cols-1 md:grid-cols-12 gap-gutter md:gap-lg">
+<!-- Hot Numbers Card -->
+<div class="glass-card rounded-xl p-md md:p-lg col-span-1 md:col-span-8 flex flex-col gap-md">
+<div class="flex justify-between items-center">
+<h3 class="text-headline-md font-headline-md text-on-surface flex items-center gap-xs">
+<span class="material-symbols-outlined text-tertiary">local_fire_department</span>
+                        Hot Numbers
+                    </h3>
+<span class="text-label-caps font-label-caps text-on-surface-variant bg-surface-container-high px-2 py-1 rounded">LAST 30 DAYS</span>
+</div>
+<div class="grid grid-cols-5 md:grid-cols-10 gap-sm">
+<!-- Numbers -->
+<div class="flex flex-col items-center gap-base">
+<div class="w-12 h-12 rounded-full border-2 border-tertiary flex items-center justify-center bg-surface-container text-data-display font-data-display text-tertiary bg-glow-gold">14</div>
+<span class="text-label-caps font-label-caps text-on-surface-variant">42x</span>
+</div>
+<div class="flex flex-col items-center gap-base">
+<div class="w-12 h-12 rounded-full border border-outline-variant flex items-center justify-center bg-surface-container text-data-display font-data-display text-on-surface">27</div>
+<span class="text-label-caps font-label-caps text-on-surface-variant">38x</span>
+</div>
+<div class="flex flex-col items-center gap-base">
+<div class="w-12 h-12 rounded-full border border-outline-variant flex items-center justify-center bg-surface-container text-data-display font-data-display text-on-surface">03</div>
+<span class="text-label-caps font-label-caps text-on-surface-variant">35x</span>
+</div>
+<div class="flex flex-col items-center gap-base">
+<div class="w-12 h-12 rounded-full border border-outline-variant flex items-center justify-center bg-surface-container text-data-display font-data-display text-on-surface">88</div>
+<span class="text-label-caps font-label-caps text-on-surface-variant">31x</span>
+</div>
+<div class="flex flex-col items-center gap-base">
+<div class="w-12 h-12 rounded-full border border-outline-variant flex items-center justify-center bg-surface-container text-data-display font-data-display text-on-surface">19</div>
+<span class="text-label-caps font-label-caps text-on-surface-variant">29x</span>
+</div>
+</div>
+</div>
+<!-- Cold Numbers Card -->
+<div class="glass-card rounded-xl p-md md:p-lg col-span-1 md:col-span-4 flex flex-col gap-md">
+<div class="flex justify-between items-center">
+<h3 class="text-headline-md font-headline-md text-on-surface flex items-center gap-xs">
+<span class="material-symbols-outlined text-primary">ac_unit</span>
+                        Cold Numbers
+                    </h3>
+</div>
+<ul class="flex flex-col gap-sm">
+<li class="flex items-center justify-between p-xs bg-surface-container-low rounded-lg border border-outline-variant">
+<span class="text-data-display font-data-display text-primary">54</span>
+<div class="flex-grow mx-md bg-surface-dim h-2 rounded-full overflow-hidden">
+<div class="bg-primary h-full w-[10%]"></div>
+</div>
+<span class="text-body-sm font-body-sm text-on-surface-variant">2x</span>
+</li>
+<li class="flex items-center justify-between p-xs bg-surface-container-low rounded-lg border border-outline-variant">
+<span class="text-data-display font-data-display text-primary">11</span>
+<div class="flex-grow mx-md bg-surface-dim h-2 rounded-full overflow-hidden">
+<div class="bg-primary h-full w-[15%]"></div>
+</div>
+<span class="text-body-sm font-body-sm text-on-surface-variant">4x</span>
+</li>
+<li class="flex items-center justify-between p-xs bg-surface-container-low rounded-lg border border-outline-variant">
+<span class="text-data-display font-data-display text-primary">72</span>
+<div class="flex-grow mx-md bg-surface-dim h-2 rounded-full overflow-hidden">
+<div class="bg-primary h-full w-[18%]"></div>
+</div>
+<span class="text-body-sm font-body-sm text-on-surface-variant">5x</span>
+</li>
+</ul>
+</div>
+<!-- Lucky Trends -->
+<div class="glass-card rounded-xl p-md md:p-lg col-span-1 md:col-span-12 flex flex-col gap-md">
+<h3 class="text-headline-md font-headline-md text-on-surface flex items-center gap-xs">
+<span class="material-symbols-outlined text-secondary">auto_awesome</span>
+                    Lucky Trends
+                </h3>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-md">
+<!-- Monthly Trend -->
+<div class="bg-surface-container rounded-lg p-md border border-outline-variant flex gap-md items-center relative overflow-hidden">
+<div class="absolute inset-0 opacity-10" data-alt="A subtle, dark and mysterious abstract background representing a calendar or passage of time, using deep blues and subtle cyan highlights. Minimalist, modern corporate aesthetic." style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuCd47LzK4ZS3gbDAtlYPpsJDE9QafD8tznqHxKRxpjPIpTcMs0-OnO1k2VpWvAhj8qaGDoj5MtyTic0de7ng3zYUwvvKxDzGDokxiKpkOqow9IbOH2JeD_WinuDZZxrprQSvhcSF9wyvbBgaxFvFvdNzSPVJyGCRVzGlk00C6HHOrIDp_c_Pd9qpflEXjt-JLwpm0L4PBP3sUMGNbdji-wJt7GndyObbY65RPAI9O2UQjcAJp5wqMDdFw')"></div>
+<div class="bg-surface-dim w-16 h-16 rounded-full flex items-center justify-center z-10 border border-outline-variant">
+<span class="material-symbols-outlined text-3xl text-secondary">calendar_month</span>
+</div>
+<div class="z-10 flex flex-col">
+<span class="text-label-caps font-label-caps text-secondary">NOVEMBER TRENDS</span>
+<span class="text-body-lg font-body-lg text-on-surface">Odd numbers are drawing 15% more frequently this month.</span>
+</div>
+</div>
+<!-- Zodiac Trend -->
+<div class="bg-surface-container rounded-lg p-md border border-outline-variant flex gap-md items-center relative overflow-hidden">
+<div class="absolute inset-0 opacity-10" data-alt="A subtle, dark abstract background representing astrological signs and stars, using deep space colors with faint gold dust. Minimalist, modern corporate aesthetic." style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuDrlbkKgC4VyLMujH4k4fZZ6OPwETSR9aI0cnvLqjawBU8Y5QNSwrGxMzLot3Azz8gg_wlI0lXXlQvvhGdewvJUSk2v9gm3yGS_gcECIautbs2wBFj18QoqPqwy8c7_S4Jcb5wgfFilRwXEepYO0qjDSUZ37ROovHDauR3J9zT_n8Wcyc5Zq5TdhhuoK4Eqg0hVTlB_kTxmx6859DNhrki2j1l6b5_jmKJbwaaqI9My7mlLYsvTgcunnw')"></div>
+<div class="bg-surface-dim w-16 h-16 rounded-full flex items-center justify-center z-10 border border-outline-variant">
+<span class="material-symbols-outlined text-3xl text-tertiary">stars</span>
+</div>
+<div class="z-10 flex flex-col">
+<span class="text-label-caps font-label-caps text-tertiary">SCORPIO CYCLE</span>
+<span class="text-body-lg font-body-lg text-on-surface">Numbers ending in '8' show a strong historical spike.</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+</main>
+<!-- BottomNavBar (Mobile Only) -->
+<nav class="md:hidden docked full-width bottom-0 rounded-t-xl bg-surface-container dark:bg-surface-container-highest backdrop-blur-md shadow-[0_-4px_24px_rgba(16,185,129,0.15)] fixed left-0 w-full z-50 flex justify-around items-center px-4 pb-4 pt-2">
+<a class="flex flex-col items-center justify-center text-on-surface-variant dark:text-outline p-2 hover:text-secondary dark:hover:text-secondary-fixed" href="#">
+<span class="material-symbols-outlined">dashboard</span>
+<span class="text-label-caps font-label-caps mt-1">Dashboard</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant dark:text-outline p-2 hover:text-secondary dark:hover:text-secondary-fixed" href="#">
+<span class="material-symbols-outlined">history</span>
+<span class="text-label-caps font-label-caps mt-1">Results</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant dark:text-outline p-2 hover:text-secondary dark:hover:text-secondary-fixed" href="#">
+<span class="material-symbols-outlined">casino</span>
+<span class="text-label-caps font-label-caps mt-1">Generator</span>
+</a>
+<a class="flex flex-col items-center justify-center bg-secondary-container dark:bg-on-secondary-fixed-variant text-on-secondary-container dark:text-secondary-fixed rounded-full px-4 py-1 Active: scale-110 transition-all duration-200" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">analytics</span>
+<span class="text-label-caps font-label-caps mt-1">Stats</span>
+</a>
+</nav>
+</body></html>

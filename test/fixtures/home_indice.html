@@ -1,0 +1,842 @@
+
+<!DOCTYPE html>
+<html>
+<head>     
+<meta name="viewport" content="width=device-width, initial-scale=1">
+ <link rel="stylesheet" href="css/style.css">
+ <link rel="stylesheet" href="css/menu.css">
+   <link rel="stylesheet" href="css/resultados.css">   
+
+<script src="https://code.jquery.com/jquery-3.7.1.min.js"
+        integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo="
+        crossorigin="anonymous"></script>
+  <title>La Quiniela de la Ciudad / Loterìa de la Ciudad de Buenos Aires</title>
+<link rel="apple-touch-icon" sizes="57x57" href="favicon/apple-icon-57x57.png">
+<link rel="apple-touch-icon" sizes="60x60" href="favicon/apple-icon-60x60.png">
+<link rel="apple-touch-icon" sizes="72x72" href="favicon/apple-icon-72x72.png">
+<link rel="apple-touch-icon" sizes="76x76" href="favicon/apple-icon-76x76.png">
+<link rel="apple-touch-icon" sizes="114x114" href="favicon/apple-icon-114x114.png">
+<link rel="apple-touch-icon" sizes="120x120" href="favicon/apple-icon-120x120.png">
+<link rel="apple-touch-icon" sizes="144x144" href="favicon/apple-icon-144x144.png">
+<link rel="apple-touch-icon" sizes="152x152" href="favicon/apple-icon-152x152.png">
+<link rel="apple-touch-icon" sizes="180x180" href="favicon/apple-icon-180x180.png">
+<link rel="icon" type="image/png" sizes="192x192"  href="favicon/android-icon-192x192.png">
+<link rel="icon" type="image/png" sizes="32x32" href="favicon/favicon-32x32.png">
+<link rel="icon" type="image/png" sizes="96x96" href="favicon/favicon-96x96.png">
+<link rel="icon" type="image/png" sizes="16x16" href="favicon/favicon-16x16.png">
+<link rel="manifest" href="favicon/manifest.json">
+<meta name="msapplication-TileColor" content="#ffffff">
+<meta name="msapplication-TileImage" content="/ms-icon-144x144.png">
+<meta name="theme-color" content="#ffffff">
+</head>
+<body id="arriba">
+<div id="sideMenu">
+<ul>
+    <li class="backcolor"><a href="https://quiniela.loteriadelaciudad.gob.ar/" target="_blank"><img src="images/quinielaIco.svg" ></a></li>
+  <li class="backcolor"><a href="https://poceada.loteriadelaciudad.gob.ar/" target="_blank"><img src="images/poceadaIco.svg" ></a></li> 
+  <li class="backcolor"><a href="https://tombolina.loteriadelaciudad.gob.ar/" target="_blank"><img src="images/tombolinaIco.svg" ></a></li> 
+  <li class="backcolor"><a href="http://otrachance.gob.ar" target="_blank"><img src="images/otraChanceIco.svg" ></a></li>
+    <li class="backcolor"><a href="https://loto.loteriadelaciudad.gob.ar/" target="_blank"><img src="images/lotoIco.svg" ></a></li>
+  <li class="backcolor"><a href="https://loto5.loteriadelaciudad.gob.ar/" target="_blank"><img src="images/loto5Ico.svg" ></a></li>
+      <li class="backcolor"><a href="https://lagrande.loteriadelaciudad.gob.ar/" target="_blank"><img src="images/grandeIco.svg" ></a></li>
+	    <li class="backcolor"><a href="https://quinielaya.loteriadelaciudad.gob.ar/" target="_blank"><img src="images/quinielaYaIco.svg" ></a></li>
+  <li class="backcolor"><a href="https://raspaya.loteriadelaciudad.gob.ar/" target="_blank"><img src="images/raspayaIco.svg" ></a></li>
+   <li class="backcolor"><a href="https://www.tuagencialotba.bet.ar/login" target="_blank"><img src="images/JuegoOnlineIco.svg" ></a></li>
+    <li class=""><a href="https://www.loteriadelaciudad.gob.ar/juegos/"><img src="images/home.svg" ></a></li>
+  <li class=""><a href="#arriba"><img src="images/arriba.svg" ></a></li>
+</ul></div>
+<div id="page-container">
+  <header id="encabezado">
+<div class="header">
+   <div class="logo"><img src="images/logoQuiniela.svg" width="100%"> </div>
+<div class="icon">
+   <a href="javascript:void(0);" onclick="openNav()">&#9776;</a>
+ </div>
+  
+<div id="myNav" class="overlay">
+    <div class="content-nav"> 
+     <a href="javascript:void(0)" class="closebtn" onclick="closeNav()">&times;</a>  
+  <div class="overlay-content">
+   <ul>
+    <li class="dropdown">
+    <a href="javascript:void(0)" class="dropbtn">Resultados</a>
+    <div class="dropdown-content">
+       <a href="https://quiniela.loteriadelaciudad.gob.ar/" target="_blank">Quiniela de la Ciudad</a>
+      <a href="https://poceada.loteriadelaciudad.gob.ar/" target="_blank">Quiniela Poceada de la Ciudad</a>
+      <a href="https://tombolina.loteriadelaciudad.gob.ar/" target="_blank">Tombolina</a> 
+      <a href="http://otrachance.gob.ar" target="_blank">Otra Chance</a>
+      <a href="https://loto.loteriadelaciudad.gob.ar/" target="_blank">Loto Plus</a>
+      <a href="https://loto5.loteriadelaciudad.gob.ar/" target="_blank">Loto 5 Plus</a>
+      <a href="https://lagrande.loteriadelaciudad.gob.ar/" target="_blank">La Grande de la Ciudad</a>
+	  	  <a href="https://quinielaya.loteriadelaciudad.gob.ar/" target="_blank">Quiniela Ya de la Ciudad</a>
+      <a href="https://raspaya.loteriadelaciudad.gob.ar/" target="_blank">Raspaya</a>
+      <a href="https://www.loteriasantafe.gov.ar/index.php/resultados/quini-6?view=resultados" target="_blank">Quini 6</a>
+      <a href="https://www.loteriasantafe.gov.ar/index.php/resultados/brinco?view=resultados" target="_blank">Brinco</a>
+      <a href="https://www.telekino.com.ar/" target="_blank">Telekino</a>
+      
+    </div>
+  </li> 
+  <li class="separador"><a href="https://www.loteriadelaciudad.gob.ar/juegos/?page=sorteo-en-vivo">Sorteos en vivo</a></li>
+  <li class="separador"><a href="#programacion">Programación</a></li>
+  <li class="separador"><a href="#como-se-juega">¿Cómo se Juega?</a></li>
+    <li class="dropdown separador">
+    <a href="javascript:void(0)" class="dropbtn">más información</a>
+    <div class="dropdown-content">
+      <a href="https://www.loteriadelaciudad.gob.ar/juegos/?page=noticias" target="_blank">Noticias</a>
+      <a href="https://www.loteriadelaciudad.gob.ar/juegos/?page=puntos-de-venta" target="_blank">Puntos de Venta</a>
+      <a href="https://www.loteriadelaciudad.gob.ar/juegos/?page=asesores-comerciales" target="_blank">Asesores comerciales</a> 
+      <a href="https://www.loteriadelaciudad.gob.ar/juegos/?page=preguntas-frecuentes" target="_blank">Preguntas frecuentes</a>
+    </div>
+  </li> 
+ 
+</ul>  </div>
+ 
+  </div>
+</div>  
+<a href="https://www.lotba.bet.ar/" style="float:right;margin-right:30px; " target="_blank"><img src="images/botonJuegoOnline.png" width="200" /></a>
+  </div>
+
+  </header>  
+                   <style>
+                   .noticias .extractoIzq{width:40%;float:left;margin-left:4%;}
+                   .noticias .extractoDer{width:40%;float:left;margin-left:16%;}
+                   .noticias .web {display:block;}
+                   .noticias .sd {display:none;}
+                   .programacion{border-radius:10px;background-color:#FCC000;margin-bottom:50px;text-align:center;padding:10px;}
+                   .programa{border-radius:10px;margin-bottom:50px;text-align:center;}
+                   .programa table{width:100%;text-align:center;}
+                   .programa  ul {padding-inline-start: 0px;}
+                   .programa  ul li{list-style:none;padding:10px;}
+                   .programa input{width:100%;}
+                   .programa button{width:27vw;padding:10px;cursor:pointer;}
+                   .programa .ui-selectmenu-button.ui-button { width:27vw;}
+                   #Lunes, #Martes, #Miercoles, #Jueves, #Viernes, #Sabado, #Domingo{display:none;}
+                   .ps .ui-selectmenu-button.ui-button { width:28vw;}
+                   .ps table{padding:10px;}
+                   .ps td{padding:10px;}
+                    @media screen and (max-width: 845px) { 
+                      .programa .ui-selectmenu-button.ui-button { width:75vw;}
+                      .ps .ui-selectmenu-button.ui-button { width:75vw;}
+                     .programa button{width:75vw;} 
+                    .noticias .web {display:none;}
+                   .noticias .sd {display:block;}
+                    .noticias .extractoIzq,.noticias .extractoDer{width:100%;float:none;margin-left:0%;}
+                    }
+                   </style>
+<div id="content-wrap">
+<div class="noticias">
+  <h1>Resultados</h1>
+       <link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
+<script src="https://code.jquery.com/jquery-1.12.4.js"></script>
+<script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+
+<script>
+$( function() {
+  
+ 
+    $( "#valor3" ).selectmenu({
+       change: function( event, data ) {
+    resultadosCiudad('0080', '51', data.item.value);
+    resultadosBsAs('0080', '53', data.item.value);
+    resultadosSaFe('0080','72', data.item.value);   
+    resultadosCord('0080', '55', data.item.value);
+    resultadosRios('0080', '64', data.item.value);
+    resultadosMend('0080', '59', data.item.value);
+    resultadosUrug('0080', '00', data.item.value);   
+       }
+     });
+  } );
+  
+  
+  
+function resultadosCiudad(codigo,juridiccion,sorteo){ 
+
+        var parametros = {
+                "codigo" : codigo,
+                "juridiccion" : juridiccion,
+                "sorteo" : sorteo,
+        };               
+        
+            
+
+        $.ajax({
+                data:  parametros, //datos que se envian a traves de ajax
+                url:   'resultadosQuiniela/consultaResultados.php', //archivo que recibe la peticion
+                type:  'post', //método de envio
+                beforeSend: function () {     
+                document.getElementById("resultadosCiudad").innerHTML = "<div style='position:fixed;z-index:999999999;top:0px; left:0px;text-align:center;margin:0;width:100%; height:100vh;background-color:rgba(0,0,0,0.5)'><img style='position:fixed; z-index:9999; text-align:center; top:50vh;;width:50px;' src='images/loader.gif' /></div>";
+                 
+                },
+                success:  function (response) { //una vez que el archivo recibe el request lo procesa y lo devuelve
+                document.getElementById("resultadosCiudad").innerHTML = response;
+                        // $("#resultadosAnteriores").html(response);
+                }
+        });  
+}
+
+
+    
+
+</script>
+
+          <style>
+.descarga {    position: relative;
+   left: 85%;
+    bottom: 6vh;
+    width: 200px;}
+.ui-selectmenu-button.ui-button {
+     width: 50vw; }
+  @media screen and (max-width: 840px) { 
+    .ui-selectmenu-button.ui-button {
+     width: 100%; }
+     .descarga{position: static;padding-bottom:20px;}}
+     
+  
+
+</style>
+   <div id='formCiudad' style='padding: 0 20px 20px 0;'><div id='comboCiudad'><style>
+.descarga {
+     position: relative;
+     left: 85%;
+     bottom: 6vh;
+     width: 200px;
+     }
+.ui-selectmenu-button.ui-button {
+     width: 38vw; }
+  @media screen and (max-width: 840px) { .ui-selectmenu-button.ui-button {
+     width: 50vw; } }
+  @media screen and (max-width: 450px) {
+     .ui-selectmenu-button.ui-button {
+     width: 100%; }
+     .descarga{position: static;padding-bottom:20px;}
+  }    
+     
+  
+
+</style>
+<select id='valor3' name="valor3">
+<option value=52769>Fecha: 13/08/2026 - Sorteo: 52769</option><option value=52768>Fecha: 13/08/2026 - Sorteo: 52768</option><option value=52767>Fecha: 13/08/2026 - Sorteo: 52767</option><option value=52766>Fecha: 12/08/2026 - Sorteo: 52766</option><option value=52765>Fecha: 12/08/2026 - Sorteo: 52765</option><option value=52764>Fecha: 12/08/2026 - Sorteo: 52764</option><option value=52763>Fecha: 12/08/2026 - Sorteo: 52763</option><option value=52762>Fecha: 12/08/2026 - Sorteo: 52762</option><option value=52761>Fecha: 11/08/2026 - Sorteo: 52761</option><option value=52760>Fecha: 11/08/2026 - Sorteo: 52760</option><option value=52759>Fecha: 11/08/2026 - Sorteo: 52759</option><option value=52758>Fecha: 11/08/2026 - Sorteo: 52758</option><option value=52757>Fecha: 11/08/2026 - Sorteo: 52757</option><option value=52756>Fecha: 10/08/2026 - Sorteo: 52756</option><option value=52755>Fecha: 10/08/2026 - Sorteo: 52755</option><option value=52754>Fecha: 10/08/2026 - Sorteo: 52754</option><option value=52753>Fecha: 10/08/2026 - Sorteo: 52753</option><option value=52752>Fecha: 10/08/2026 - Sorteo: 52752</option><option value=52751>Fecha: 08/08/2026 - Sorteo: 52751</option><option value=52750>Fecha: 08/08/2026 - Sorteo: 52750</option><option value=52749>Fecha: 08/08/2026 - Sorteo: 52749</option><option value=52748>Fecha: 08/08/2026 - Sorteo: 52748</option><option value=52747>Fecha: 08/08/2026 - Sorteo: 52747</option><option value=52746>Fecha: 07/08/2026 - Sorteo: 52746</option><option value=52745>Fecha: 07/08/2026 - Sorteo: 52745</option><option value=52744>Fecha: 07/08/2026 - Sorteo: 52744</option><option value=52743>Fecha: 07/08/2026 - Sorteo: 52743</option><option value=52742>Fecha: 07/08/2026 - Sorteo: 52742</option><option value=52741>Fecha: 06/08/2026 - Sorteo: 52741</option><option value=52740>Fecha: 06/08/2026 - Sorteo: 52740</option><option value=52739>Fecha: 06/08/2026 - Sorteo: 52739</option><option value=52738>Fecha: 06/08/2026 - Sorteo: 52738</option><option value=52737>Fecha: 06/08/2026 - Sorteo: 52737</option><option value=52736>Fecha: 05/08/2026 - Sorteo: 52736</option><option value=52735>Fecha: 05/08/2026 - Sorteo: 52735</option><option value=52734>Fecha: 05/08/2026 - Sorteo: 52734</option><option value=52733>Fecha: 05/08/2026 - Sorteo: 52733</option><option value=52732>Fecha: 05/08/2026 - Sorteo: 52732</option><option value=52731>Fecha: 04/08/2026 - Sorteo: 52731</option><option value=52730>Fecha: 04/08/2026 - Sorteo: 52730</option><option value=52729>Fecha: 04/08/2026 - Sorteo: 52729</option><option value=52728>Fecha: 04/08/2026 - Sorteo: 52728</option><option value=52727>Fecha: 04/08/2026 - Sorteo: 52727</option><option value=52726>Fecha: 03/08/2026 - Sorteo: 52726</option><option value=52725>Fecha: 03/08/2026 - Sorteo: 52725</option><option value=52724>Fecha: 03/08/2026 - Sorteo: 52724</option><option value=52723>Fecha: 03/08/2026 - Sorteo: 52723</option><option value=52722>Fecha: 03/08/2026 - Sorteo: 52722</option><option value=52721>Fecha: 01/08/2026 - Sorteo: 52721</option><option value=52720>Fecha: 01/08/2026 - Sorteo: 52720</option><option value=52719>Fecha: 01/08/2026 - Sorteo: 52719</option><option value=52718>Fecha: 01/08/2026 - Sorteo: 52718</option><option value=52717>Fecha: 01/08/2026 - Sorteo: 52717</option><option value=52716>Fecha: 31/07/2026 - Sorteo: 52716</option><option value=52715>Fecha: 31/07/2026 - Sorteo: 52715</option><option value=52714>Fecha: 31/07/2026 - Sorteo: 52714</option><option value=52713>Fecha: 31/07/2026 - Sorteo: 52713</option><option value=52712>Fecha: 31/07/2026 - Sorteo: 52712</option><option value=52711>Fecha: 30/07/2026 - Sorteo: 52711</option><option value=52710>Fecha: 30/07/2026 - Sorteo: 52710</option><option value=52709>Fecha: 30/07/2026 - Sorteo: 52709</option><option value=52708>Fecha: 30/07/2026 - Sorteo: 52708</option><option value=52707>Fecha: 30/07/2026 - Sorteo: 52707</option><option value=52706>Fecha: 29/07/2026 - Sorteo: 52706</option><option value=52705>Fecha: 29/07/2026 - Sorteo: 52705</option><option value=52704>Fecha: 29/07/2026 - Sorteo: 52704</option><option value=52703>Fecha: 29/07/2026 - Sorteo: 52703</option><option value=52702>Fecha: 29/07/2026 - Sorteo: 52702</option><option value=52701>Fecha: 28/07/2026 - Sorteo: 52701</option><option value=52700>Fecha: 28/07/2026 - Sorteo: 52700</option><option value=52699>Fecha: 28/07/2026 - Sorteo: 52699</option><option value=52698>Fecha: 28/07/2026 - Sorteo: 52698</option><option value=52697>Fecha: 28/07/2026 - Sorteo: 52697</option><option value=52696>Fecha: 27/07/2026 - Sorteo: 52696</option><option value=52695>Fecha: 27/07/2026 - Sorteo: 52695</option><option value=52694>Fecha: 27/07/2026 - Sorteo: 52694</option><option value=52693>Fecha: 27/07/2026 - Sorteo: 52693</option><option value=52692>Fecha: 27/07/2026 - Sorteo: 52692</option><option value=52691>Fecha: 25/07/2026 - Sorteo: 52691</option><option value=52690>Fecha: 25/07/2026 - Sorteo: 52690</option><option value=52689>Fecha: 25/07/2026 - Sorteo: 52689</option><option value=52688>Fecha: 25/07/2026 - Sorteo: 52688</option><option value=52687>Fecha: 25/07/2026 - Sorteo: 52687</option><option value=52686>Fecha: 24/07/2026 - Sorteo: 52686</option><option value=52685>Fecha: 24/07/2026 - Sorteo: 52685</option><option value=52684>Fecha: 24/07/2026 - Sorteo: 52684</option><option value=52683>Fecha: 24/07/2026 - Sorteo: 52683</option><option value=52682>Fecha: 24/07/2026 - Sorteo: 52682</option><option value=52681>Fecha: 23/07/2026 - Sorteo: 52681</option><option value=52680>Fecha: 23/07/2026 - Sorteo: 52680</option><option value=52679>Fecha: 23/07/2026 - Sorteo: 52679</option><option value=52678>Fecha: 23/07/2026 - Sorteo: 52678</option><option value=52677>Fecha: 23/07/2026 - Sorteo: 52677</option><option value=52676>Fecha: 22/07/2026 - Sorteo: 52676</option><option value=52675>Fecha: 22/07/2026 - Sorteo: 52675</option><option value=52674>Fecha: 22/07/2026 - Sorteo: 52674</option><option value=52673>Fecha: 22/07/2026 - Sorteo: 52673</option><option value=52672>Fecha: 22/07/2026 - Sorteo: 52672</option><option value=52671>Fecha: 21/07/2026 - Sorteo: 52671</option><option value=52670>Fecha: 21/07/2026 - Sorteo: 52670</option><option value=52669>Fecha: 21/07/2026 - Sorteo: 52669</option><option value=52668>Fecha: 21/07/2026 - Sorteo: 52668</option><option value=52667>Fecha: 21/07/2026 - Sorteo: 52667</option><option value=52666>Fecha: 20/07/2026 - Sorteo: 52666</option><option value=52665>Fecha: 20/07/2026 - Sorteo: 52665</option><option value=52664>Fecha: 20/07/2026 - Sorteo: 52664</option><option value=52663>Fecha: 20/07/2026 - Sorteo: 52663</option><option value=52662>Fecha: 20/07/2026 - Sorteo: 52662</option><option value=52661>Fecha: 18/07/2026 - Sorteo: 52661</option><option value=52660>Fecha: 18/07/2026 - Sorteo: 52660</option><option value=52659>Fecha: 18/07/2026 - Sorteo: 52659</option><option value=52658>Fecha: 18/07/2026 - Sorteo: 52658</option><option value=52657>Fecha: 18/07/2026 - Sorteo: 52657</option><option value=52656>Fecha: 17/07/2026 - Sorteo: 52656</option><option value=52655>Fecha: 17/07/2026 - Sorteo: 52655</option><option value=52654>Fecha: 17/07/2026 - Sorteo: 52654</option><option value=52653>Fecha: 17/07/2026 - Sorteo: 52653</option><option value=52652>Fecha: 17/07/2026 - Sorteo: 52652</option><option value=52651>Fecha: 16/07/2026 - Sorteo: 52651</option><option value=52650>Fecha: 16/07/2026 - Sorteo: 52650</option><option value=52649>Fecha: 16/07/2026 - Sorteo: 52649</option><option value=52648>Fecha: 16/07/2026 - Sorteo: 52648</option><option value=52647>Fecha: 16/07/2026 - Sorteo: 52647</option><option value=52646>Fecha: 15/07/2026 - Sorteo: 52646</option><option value=52645>Fecha: 15/07/2026 - Sorteo: 52645</option><option value=52644>Fecha: 15/07/2026 - Sorteo: 52644</option><option value=52643>Fecha: 15/07/2026 - Sorteo: 52643</option><option value=52642>Fecha: 15/07/2026 - Sorteo: 52642</option><option value=52641>Fecha: 14/07/2026 - Sorteo: 52641</option><option value=52640>Fecha: 14/07/2026 - Sorteo: 52640</option></select>
+
+
+</div></div> 
+    <div id="resultadosCiudad"></div>
+    
+
+
+
+<div style="text-align:center;padding:50px;" >Los resultados de otras juridicciones pertenecen a la misma fecha que el extacto de Ciudad.</div><div class="extractoIzq" >
+
+<script>
+  
+function resultadosBsAs(codigo,juridiccion,sorteo){ 
+
+        var parametros = {
+                "codigo" : codigo,
+                "juridiccion" : juridiccion,
+                "sorteo" : sorteo,
+        };               
+        
+            
+
+        $.ajax({
+                data:  parametros, //datos que se envian a traves de ajax
+                url:   'resultadosQuiniela/consultaResultados.php', //archivo que recibe la peticion
+                type:  'post', //método de envio
+                beforeSend: function () {     
+                document.getElementById("resultadosBsAs").innerHTML = "<div style='position:fixed;z-index:999999999;top:0px; left:0px;text-align:center;margin:0;width:100%; height:100vh;background-color:rgba(0,0,0,0.5)'><img style='position:fixed; z-index:9999; text-align:center; top:50vh;;width:50px;' src='images/loader.gif' /></div>";
+                 
+                },
+                success:  function (response) { //una vez que el archivo recibe el request lo procesa y lo devuelve
+                document.getElementById("resultadosBsAs").innerHTML = response;
+                        // $("#resultadosAnteriores").html(response);
+                }
+        });  
+}
+
+
+    
+
+</script>
+    
+ 
+    <div id="resultadosBsAs"'></div>
+<script>
+  
+  
+    
+
+</script>
+
+</div><div class="extractoDer" >
+
+<script>
+
+  
+  
+  
+function resultadosSaFe(codigo,juridiccion,sorteo){ 
+
+        var parametros = {
+                "codigo" : codigo,
+                "juridiccion" : juridiccion,
+                "sorteo" : sorteo,
+        };               
+        
+            
+
+        $.ajax({
+                data:  parametros, //datos que se envian a traves de ajax
+                url:   'resultadosQuiniela/consultaResultados.php', //archivo que recibe la peticion
+                type:  'post', //método de envio
+                beforeSend: function () {     
+                document.getElementById("resultadosSaFe").innerHTML = "<div style='position:fixed;z-index:999999999;top:0px; left:0px;text-align:center;margin:0;width:100%; height:100vh;background-color:rgba(0,0,0,0.5)'><img style='position:fixed; z-index:9999; text-align:center; top:50vh;;width:50px;' src='images/loader.gif' /></div>";
+                 
+                },
+                success:  function (response) { //una vez que el archivo recibe el request lo procesa y lo devuelve
+                document.getElementById("resultadosSaFe").innerHTML = response;
+                        // $("#resultadosAnteriores").html(response);
+                }
+        });  
+}
+
+
+    
+
+</script>
+
+    <div id="resultadosSaFe"></div>
+<script>
+  
+  
+    
+
+</script>
+
+</div><div class="extractoIzq">
+
+<script>
+
+  
+  
+  
+function resultadosCord(codigo,juridiccion,sorteo){ 
+
+        var parametros = {
+                "codigo" : codigo,
+                "juridiccion" : juridiccion,
+                "sorteo" : sorteo,
+        };               
+        
+            
+
+        $.ajax({
+                data:  parametros, //datos que se envian a traves de ajax
+                url:   'resultadosQuiniela/consultaResultados.php', //archivo que recibe la peticion
+                type:  'post', //método de envio
+                beforeSend: function () {     
+                document.getElementById("resultadosCord").innerHTML = "<div style='position:fixed;z-index:999999999;top:0px; left:0px;text-align:center;margin:0;width:100%; height:100vh;background-color:rgba(0,0,0,0.5)'><img style='position:fixed; z-index:9999; text-align:center; top:50vh;;width:50px;' src='images/loader.gif' /></div>";
+                 
+                },
+                success:  function (response) { //una vez que el archivo recibe el request lo procesa y lo devuelve
+                document.getElementById("resultadosCord").innerHTML = response;
+                        // $("#resultadosAnteriores").html(response);
+                }
+        });  
+}
+
+
+    
+
+</script>
+
+    <div id="resultadosCord"></div>
+<script>
+  
+  
+    
+
+</script>
+
+</div><div class="extractoDer" >
+
+<script>
+
+  
+function resultadosMend(codigo,juridiccion,sorteo){ 
+
+        var parametros = {
+                "codigo" : codigo,
+                "juridiccion" : juridiccion,
+                "sorteo" : sorteo,
+        };               
+        
+            
+
+        $.ajax({
+                data:  parametros, //datos que se envian a traves de ajax
+                url:   'resultadosQuiniela/consultaResultados.php', //archivo que recibe la peticion
+                type:  'post', //método de envio
+                beforeSend: function () {     
+                document.getElementById("resultadosMend").innerHTML = "<div style='position:fixed;z-index:999999999;top:0px; left:0px;text-align:center;margin:0;width:100%; height:100vh;background-color:rgba(0,0,0,0.5)'><img style='position:fixed; z-index:9999; text-align:center; top:50vh;;width:50px;' src='images/loader.gif' /></div>";
+                 
+                },
+                success:  function (response) { //una vez que el archivo recibe el request lo procesa y lo devuelve
+                document.getElementById("resultadosMend").innerHTML = response;
+                        // $("#resultadosAnteriores").html(response);
+                }
+        });  
+}
+
+
+    
+
+</script>
+
+ 
+    <div id="resultadosMend"></div>
+<script>
+  
+  
+    
+
+</script>
+
+</div><div class="extractoIzq" >
+<script>
+
+  
+  
+function resultadosRios(codigo,juridiccion,sorteo){ 
+
+        var parametros = {
+                "codigo" : codigo,
+                "juridiccion" : juridiccion,
+                "sorteo" : sorteo,
+        };               
+        
+            
+
+        $.ajax({
+                data:  parametros, //datos que se envian a traves de ajax
+                url:   'resultadosQuiniela/consultaResultados.php', //archivo que recibe la peticion
+                type:  'post', //método de envio
+                beforeSend: function () {     
+                document.getElementById("resultadosRios").innerHTML = "<div style='position:fixed;z-index:999999999;top:0px; left:0px;text-align:center;margin:0;width:100%; height:100vh;background-color:rgba(0,0,0,0.5)'><img style='position:fixed; z-index:9999; text-align:center; top:50vh;;width:50px;' src='images/loader.gif' /></div>";
+                 
+                },
+                success:  function (response) { //una vez que el archivo recibe el request lo procesa y lo devuelve
+                document.getElementById("resultadosRios").innerHTML = response;
+                        // $("#resultadosAnteriores").html(response);
+                }
+        });  
+}
+
+
+    
+
+</script>
+
+ 
+    <div id="resultadosRios"></div>
+<script>
+  
+  
+    
+
+</script>
+
+</div><div class="extractoDer" >
+
+<script>
+
+  
+  
+  
+function resultadosUrug(codigo,juridiccion,sorteo){ 
+
+        var parametros = {
+                "codigo" : codigo,
+                "juridiccion" : juridiccion,                                   
+                "sorteo" : sorteo,
+        };               
+        
+            
+
+        $.ajax({
+                data:  parametros, //datos que se envian a traves de ajax
+                url:   'resultadosQuiniela/consultaResultados.php', //archivo que recibe la peticion
+                type:  'post', //método de envio
+                beforeSend: function () {     
+                document.getElementById("resultadosUrug").innerHTML = "<div style='position:fixed;z-index:999999999;top:0px; left:0px;text-align:center;margin:0;width:100%; height:100vh;background-color:rgba(0,0,0,0.5)'><img style='position:fixed; z-index:9999; text-align:center; top:50vh;;width:50px;' src='images/loader.gif' /></div>";
+                 
+                },
+                success:  function (response) { //una vez que el archivo recibe el request lo procesa y lo devuelve
+                document.getElementById("resultadosUrug").innerHTML = response;
+                        // $("#resultadosAnteriores").html(response);
+                }
+        });  
+}
+
+
+    
+
+</script>
+
+    <div id="resultadosUrug"></div>
+<script>
+  
+   
+    
+
+</script>
+
+</div>
+            <script>
+  
+    resultadosCiudad('0080', '51', $('#valor3').val());
+    resultadosBsAs('0080', '53', $('#valor3').val());
+    resultadosSaFe('0080','72', $('#valor3').val());   
+    resultadosCord('0080', '55', $('#valor3').val());
+    resultadosRios('0080', '64', $('#valor3').val());
+    resultadosMend('0080', '59', $('#valor3').val());
+    resultadosUrug('0080', '00', $('#valor3').val());    
+    
+
+</script>
+</div>  
+<div class="seuo" style="clear:both;"> <p >SEUO los datos consignados son meramente referenciales</p>     </div> 
+<div class="noticias" style="clear:both;">  
+<h1 id="programacion">Programación</h1>
+
+<div class="extractoIzq ps">
+  
+<script>
+$( function() {
+  
+ 
+    $( "#comboFecha" ).selectmenu({
+    
+       change: function( event, data ) {
+    
+    muestraProgrmacion(data.item.value);
+ 
+       }
+     });
+  } );  
+  </script>
+        
+                    
+        <div class="content-quinielas programa"><h3>PROGRAMACIÓN SEMANAL</h3>
+        
+        <select id='comboFecha'><option value='Lunes'  >Lunes 10 de Agosto del año 2026</option><option value='Martes'  >Martes 11 de Agosto del año 2026</option><option value='Miercoles'  >Miércoles 12 de Agosto del año 2026</option><option value='Jueves'  >Jueves 13 de Agosto del año 2026</option><option value='Viernes'  >Viernes 14 de Agosto del año 2026</option><option value='Sabado'  >Sábado 15 de Agosto del año 2026</option></select><div id='Lunes'><table><tr><th>SORTEO</th><th>MODALIDAD</th><th>HORARIO</th></tr><tr><td>52752</td><td>PREVIA</td><td>10:15</td></tr><tr><td>52753</td><td>PRIMERA</td><td>12:00</td></tr><tr><td>52754</td><td>MATUTINA</td><td>15:00</td></tr><tr><td>52755</td><td>VESPERTINA</td><td>18:00</td></tr><tr><td>52756</td><td>NOCTURNA</td><td>21:00</td></tr></table></div><div id='Martes'><table><tr><th>SORTEO</th><th>MODALIDAD</th><th>HORARIO</th></tr><tr><td>52757</td><td>PREVIA</td><td>10:15</td></tr><tr><td>52758</td><td>PRIMERA</td><td>12:00</td></tr><tr><td>52759</td><td>MATUTINA</td><td>15:00</td></tr><tr><td>52760</td><td>VESPERTINA</td><td>18:00</td></tr><tr><td>52761</td><td>NOCTURNA</td><td>21:00</td></tr></table></div><div id='Miercoles'><table><tr><th>SORTEO</th><th>MODALIDAD</th><th>HORARIO</th></tr><tr><td>52762</td><td>PREVIA</td><td>10:15</td></tr><tr><td>52763</td><td>PRIMERA</td><td>12:00</td></tr><tr><td>52764</td><td>MATUTINA</td><td>15:00</td></tr><tr><td>52765</td><td>VESPERTINA</td><td>18:00</td></tr><tr><td>52766</td><td>NOCTURNA</td><td>21:00</td></tr></table></div><div id='Jueves'><table><tr><th>SORTEO</th><th>MODALIDAD</th><th>HORARIO</th></tr><tr><td>52767</td><td>PREVIA</td><td>10:15</td></tr><tr><td>52768</td><td>PRIMERA</td><td>12:00</td></tr><tr><td>52769</td><td>MATUTINA</td><td>15:00</td></tr><tr><td>52770</td><td>VESPERTINA</td><td>18:00</td></tr><tr><td>52771</td><td>NOCTURNA</td><td>21:00</td></tr></table></div><div id='Viernes'><table><tr><th>SORTEO</th><th>MODALIDAD</th><th>HORARIO</th></tr><tr><td>52772</td><td>PREVIA</td><td>10:15</td></tr><tr><td>52773</td><td>PRIMERA</td><td>12:00</td></tr><tr><td>52774</td><td>MATUTINA</td><td>15:00</td></tr><tr><td>52775</td><td>VESPERTINA</td><td>18:00</td></tr><tr><td>52776</td><td>NOCTURNA</td><td>21:00</td></tr></table></div><div id='Sabado'><table><tr><th>SORTEO</th><th>MODALIDAD</th><th>HORARIO</th></tr><tr><td>52777</td><td>PREVIA</td><td>10:15</td></tr><tr><td>52778</td><td>PRIMERA</td><td>12:00</td></tr><tr><td>52779</td><td>MATUTINA</td><td>15:00</td></tr><tr><td>52780</td><td>VESPERTINA</td><td>18:00</td></tr><tr><td>52781</td><td>NOCTURNA</td><td>21:00</td></tr></table></div>                                                             
+                                                 </div>
+                                               <script>
+                                              
+                                                                        muestraProgrmacion($('#comboFecha').val());
+                                               function muestraProgrmacion(combo){
+                                               if( $('#Lunes').length ){ $("#Lunes").css({"display": "none"});}
+                                               if( $('#Martes').length ){ $("#Martes").css({"display": "none"});}
+                                               if( $('#Miercoles').length ){ $("#Miercoles").css({"display": "none"});}
+                                               if( $('#Jueves').length ){ $("#Jueves").css({"display": "none"});}
+                                               if( $('#Viernes').length ){ $("#Viernes").css({"display": "none"});}
+                                               if( $('#Sabado').length ){ $("#Sabado").css({"display": "none"});}
+                                               if( $('#Domingo').length ){ $("#Domingo").css({"display": "none"});}
+                                               $("#"+combo).css({"display": "block"});
+                                                }
+                                               </script></div>
+<div class="extractoDer ">
+<script>
+$( function() {
+  
+    $( "#comboAno" ).selectmenu({});
+    $( "#comboMes" ).selectmenu({});
+    
+    $("#submit").click(function() {     
+      if($('input[type=radio][name=version]:checked').length == 0)
+      {
+         alert("Por favor seleccione la version");
+         return false;
+      }
+      else
+      {
+          return true;
+      }      
+    });
+    
+  } );  
+  
+
+  </script>
+  
+<div class="content-quinielas programa"><h3>PROGRAMACIÓN MENSUAL</h3>
+<form  method="POST" action="descargaPrograma.php" target="_bkank">
+<ul>   
+<li>
+<select id='comboAno' name="ano" style="padding:3px;"> 
+                    <option value="2025" >2025</option><option value="2026" selected>2026</option><option value="2027" >2027</option></select></li>
+<li><select  id='comboMes' name="mes" style="padding:3px;"> 
+
+<option value='01' >Enero</option><option value='02' >Febrero</option><option value='03' >Marzo</option><option value='04' >Abril</option><option value='05' >Mayo</option><option value='06' >Junio</option><option value='07' >Julio</option><option value='08' selected>Agosto</option><option value='09' >Septiembre</option><option value='10' >Octubre</option><option value='11' >Noviembre</option><option value='12' >Diciembre</option></select></li><li><table><tr><td><input type='radio'  name='version' value='0'></td><td><input type='radio'  name='version' value='1'></td></tr><tr><td>Version Simple</td><td>Version Completa</td></tr></table></li><li><button id='submit'>DESCARGAR</button></li></ul><input type='hidden' name='juego' value='QUI'></form><script>    
+         
+// feriado(8,2026);              
+  
+</script></div></div>
+
+</div> 
+<div class="noticias" style="clear:both;">  
+<h1 id="como-se-juega">¿Cómo se juega?</h1>
+<div class="ComoJuega-content" style="">
+<p>🔢 Elegí un número de 1 a 4 cifras, entre el 0000 y el 9999.</p>
+<p>📍 Seleccioná la posición de salida (del 1 al 20) y el extracto de la Lotería al que quieras apostar (según programación).</p>
+<p>💲 Apuesta mínima por extracto:$150,00.-.</p>
+
+<p>💰 Premios según la cantidad y posición de los números apostados:
+<ul class="bullets">
+<li>🎯 4 cifras → Ganas 3500 veces lo apostado.</li>
+<li>🎯 3 cifras → Ganas 600 veces lo apostado.</li>
+<li>🎯 2 cifras → Ganas 70 veces lo apostado.</li>
+<li>🎯 1 cifra → Ganas 7 veces lo apostado.</li>
+</ul></p>
+<p>📅 5 sorteos diarios.</p>
+<p style="width:50%;float:left;text-align:center;"><a href="Reglamentos/REGLAMENTO LA QUINIELA DE LA CIUDAD.pdf" target="_blank" ><img src="images/reglamentoPdf.svg" width="50px" style="vertical-align: middle;"> ver reglamento</a></p>
+<!-- <p style="width:50%;float:left;text-align:center;"><a href="#" ><img src="images/reglamentoVideo.svg" width="50px" style="vertical-align: middle;"> Mira video</a></p>-->
+<p style="clear:both;"></div>
+</div> 
+ <div class="menuIcon" >  
+   <div class="flex-container">
+      <div class=""><a href="https://quiniela.loteriadelaciudad.gob.ar/" target="_blank"><img src="images/quinielaIco.svg" ></a></div>
+  <div class=""><a href="https://poceada.loteriadelaciudad.gob.ar/" target="_blank"><img src="images/poceadaIco.svg" ></a></div> 
+  <div class=""><a href="https://tombolina.loteriadelaciudad.gob.ar/" target="_blank"><img src="images/tombolinaIco.svg" ></a></div> 
+  <div class=""><a href="http://otrachance.gob.ar" target="_blank"><img src="images/otraChanceIco.svg" ></a></div>
+  <div class="" ><a href="https://loto.loteriadelaciudad.gob.ar/" target="_blank"><img src="images/LotoIco.svg" ></a></div>  
+  <div class=""><a href="https://loto5.loteriadelaciudad.gob.ar/" target="_blank"><img src="images/Loto5Ico.svg" ></a></div>  
+  <div class=""><a href="https://lagrande.loteriadelaciudad.gob.ar/" target="_blank"><img src="images/grandeIco.svg" ></a></div>  
+  <div class=""><a href="https://raspaya.loteriadelaciudad.gob.ar/" target="_blank"><img src="images/raspayaIco.svg" ></a></div> </div>
+</div> 
+      <div class="wla"></div>
+</div>
+        ﻿    <style>
+	@font-face {
+    font-family: FontMediumGotham;
+    src:url(fonts/GothamRnd-Medium.otf);
+}
+ @font-face {
+    font-family: FontBookGotham;
+    src:url(fonts/GothamRounded-Book.otf);
+}
+  @font-face {
+    font-family: FontBoldGotham;
+    src:url(fonts/GothamRounded-Bold.otf);
+}
+        #cookie-banner {
+			 font-family: FontBookGotham;
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            background-color: #f1f1f1;
+            color: #666;
+			font-size:12px;
+            padding: 5px;
+            text-align: center;
+            z-index: 9000;
+			border-top:solid 1px #666;
+            display: none; /* Oculto inicialmente */
+        }
+        #cookie-banner button {
+			 font-family: FontBookGotham;
+            margin: 5px;
+            padding: 4px 20px;
+            border: none;
+            cursor: pointer;
+			border-radius:10px;
+        }
+		.borrar-btn{
+			width:100%;
+			border:none;
+			border-top:1px solid 3ccc;
+			padding:5px;
+			background-color: transparent; //#00B9F1
+            color: #ccc;
+			cursor:pointer;
+		}
+        .accept-btn {
+            background-color: #4CAF50;
+            color: #fff;
+        }
+        .reject-btn {
+            background-color: #00B9F1;
+            color: #fff;
+        }
+		#cookie-banner button:hover{opacity:0.5;} 
+		#cookie-banner a{color:#00B9F1;text-decoration:none;}
+		#cookie-banner a:hover{color:#666;}
+    </style>
+<script>localStorage.removeItem('cookies_consent');</script>    <div id="cookie-banner">
+       Este sitio web utiliza cookies para mejorar el análisis y la experiencia del usuario. Al continuar navegando, estás de acuerdo con nuestra <a href="https://www.loteriadelaciudad.gob.ar/site/descargar.php?dir=biblioteca/Pol%C3%ADticas/2.%20Políticas%20específicas/Seguridad%20de%20la%20información/&doc=Pol%C3%ADtica%20de%20Privacidad%20y%20Cookies.pdf" target="_blank">Política de Privacidad y Cookies</a>        <button class="accept-btn" id="accept-cookies">De acuerdo</button>
+    </div>
+
+    <script>
+document.addEventListener("DOMContentLoaded", function () {
+    const cookieBanner = document.getElementById("cookie-banner");
+    const acceptButton = document.getElementById("accept-cookies"); // Definición dentro del bloque
+    const rejectButton = document.getElementById("reject-cookies");
+	const botonCambiar = document.getElementById("botonCambiar");
+    const serverCookieValid = false;
+
+    // Mostrar banner solo cuando NO existe cookie válida en servidor
+    if (!serverCookieValid && !localStorage.getItem("cookies_consent")) {
+        cookieBanner.style.display = "block";
+    } else {
+        cookieBanner.style.display = "none";
+    }
+
+    // Acción para aceptar cookies
+    acceptButton.addEventListener("click", function () {
+        localStorage.setItem("cookies_consent", "accepted");
+        cookieBanner.style.display = "none";
+        console.log("Cookies aceptadas");
+
+        // Configurar la cookie en el servidor
+        fetch("set_cookie.php", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ cookies_consent: "accepted" }),
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.status === 'success') {
+                console.log(data.message || "Cookie guardada");
+                location.reload();
+            } else {
+                console.error(data.message || "No se pudo guardar la cookie");
+            }
+        })
+        .catch(error => console.error("Error:", error));
+    });
+
+ 
+
+
+});
+
+    </script>
+ 
+   <footer>   
+  
+  <ul class="info">
+  <li class="logoLink"><a href="https://www.loteriadelaciudad.gob.ar/" ><img src="images/logoLotbaBlanco.svg" class="logoPie" ></a><a href="https://www.saberjugar.gob.ar/" ><img src="images/logoHG.svg" class="logoPie" style="margin-left:50px;"></a><img src="images/sello18.svg" class="selloBottom"></li>
+  <br/>
+  <li>Av. Santa Fe 4362 (C1425BHS) Palermo CABA  | <a href="https://www.loteriadelaciudad.gob.ar/site/descargar.php?dir=/biblioteca/Políticas/2. Políticas específicas/Seguridad de la información/&doc=Política de Privacidad y Cookies.pdf" target="_blank" >Políticas de Privacidad y Cookies</a> </li>
+<li><a href="tel:+541143795200">+54 (011) 4379-5200</a> | <a href="tel:08003331331">0800-333-1331</a> Atención al cliente</li>
+<li><a href="tel:147">147 Denuncias o irregularidades del juego</a></li>
+<li><a href="tel:08006666006">0800-666-6006 Línea de orientación por juego problemático</a></li>
+<li><a href="https://www.saberjugar.gob.ar" target="_blank">Herramientas de juego responsable</a></li>
+<li> EL JUEGO COMPULSIVO ES PERJUDICIAL PARA VOS Y TU FAMILIA</li> 
+  </ul> 
+  <ul class="redes">
+  <li><a href="https://www.world-lotteries.org/" target="_new" ><img src="images/WLAlogo.svg" class="logoPie"></a></li>
+  <li><a href="https://www.buenosaires.gob.ar/" target="_new" ><img src="images/logoCiudadBA.svg" class="logoPie" ></a></li>
+  <li><a href="https://www.facebook.com/LoteriadelaCiudad/" target="_new" ><img src="images/social-Fb.svg" class="social"></a><a href="https://www.instagram.com/lotba.bet.ar/" target="_new" ><img src="images/social-Ig.svg" class="social" target="_new" ></a><a href="https://twitter.com/Loteria_Ciudad" target="_new" ><img src="images/social-Tw.svg" class="social" ></a><a href="https://www.youtube.com/channel/UC3M26J9ge2LTG-uWJO_TqaQ" target="_new" ><img src="images/social-Yt.svg" class="social" ></a><a href="https://ar.linkedin.com/company/loteria-de-la-ciudad-de-buenos-aires" target="_new" ><img src="images/social-In.svg" class="social" ></a></li>
+  <li><a href="https://play.google.com/store/apps/details?id=ar.gob.loteriadelaciudad.aplicacion" target="_new" ><img src="images/appPlay.svg" class="app" ></a><a href="https://itunes.apple.com/ar/app/loter%C3%ADa-de-la-ciudad/id1440599521" target="_new" ><img src="images/appStore.svg" class="app" ></a></li>
+  </ul>                                                                                                                                                                                                                      
+   </footer>
+   </div>
+</body>
+</html>
+<script>
+  /*
+var elmnt = document.getElementById("encabezado");
+    document.getElementById("sideMenu").style.width = "0";   
+window.onscroll = function(ev) {
+  
+    if ((window.innerHeight + window.scrollY) >= 1700) { 
+      document.getElementById("sideMenu").style.width = "80px";
+    } else {   document.getElementById("sideMenu").style.width = "0";
+   }
+ 
+};  */ 
+
+$(document).ready(function(){
+  // Add smooth scrolling to all links
+  $("a").on('click', function(event) {
+
+    // Make sure this.hash has a value before overriding default behavior
+    if (this.hash !== "") {
+      // Prevent default anchor click behavior
+      event.preventDefault();
+
+      // Store hash
+      var hash = this.hash;
+
+      // Using jQuery's animate() method to add smooth page scroll
+      // The optional number (800) specifies the number of milliseconds it takes to scroll to the specified area
+      $('html, body').animate({
+        scrollTop: $(hash).offset().top
+      }, 800, function(){
+   
+        // Add hash (#) to URL when done scrolling (default click behavior)
+        window.location.hash = hash;
+      });
+    } // End if
+  });
+});  
+
+
+function openNav() {   
+   var y = document.getElementById("responsive");
+  if (y.className === "overlay") {
+    y.className += " transition";
+  } 
+   
+   document.getElementById("responsive").style.width = "100%";
+}
+
+function closeNav() {
+ 
+  document.getElementById("responsive").style.width = "0%";
+}
+
+
+ 
+      window.addEventListener("resize", function(){
+
+  if (window.matchMedia("(max-width: 1024px)").matches) {
+ document.getElementById("myNav").id = 'responsive';
+   document.getElementById("responsive").style.width = "0%";
+  } else {
+   document.getElementById("responsive").id = 'myNav'; 
+   document.getElementById("myNav").style.width = "100%";
+     var y = document.getElementById("myNav");
+  if (y.className === "overlay transition") {
+    y.className = "overlay";
+  } 
+  }
+}); 
+
+
+
+function myFunction(x) {
+    
+  if (x.matches) {   
+  document.getElementById("myNav").id = 'responsive';
+   document.getElementById("responsive").style.width = "0%";
+  
+  } else {
+  document.getElementById("responsive").id = 'myNav'; 
+   document.getElementById("myNav").style.width = "100%";
+     var y = document.getElementById("myNav");
+  if (y.className === "overlay transition") {
+    y.className = "overlay";
+  } 
+  
+  }
+}                        
+    
+var x = window.matchMedia("(max-width: 1024px)")
+myFunction(x) // Call listener function at run time
+x.addListener(myFunction)
+
+</script>

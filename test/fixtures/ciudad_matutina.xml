@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<DatosSorteo>
+	<Version>1</Version>
+	<Entidad>Lotería de la Ciudad</Entidad>
+	<Juego>Quiniela de la Ciudad</Juego>
+	<Sorteo>52764</Sorteo>
+	<FechaSorteo>12-08-2026</FechaSorteo>
+	<HoraSorteo>15:00</HoraSorteo>
+	<FechaPrescripcion>11-09-2026</FechaPrescripcion>
+	<FechaProximoSorteo>12-08-2026</FechaProximoSorteo>
+	<HoraProximoSorteo>18:00</HoraProximoSorteo>
+	<Autoridades>
+		<Autoridad>
+			<AutoridadTipo>Escribano</AutoridadTipo>
+			<AutoridadNombre>BUEZAS, MARIA EUGENIA</AutoridadNombre>
+		</Autoridad>
+		<Autoridad>
+			<AutoridadTipo>Jefe de Sorteo</AutoridadTipo>
+			<AutoridadNombre>GONZALEZ, MARIA CECILIA</AutoridadNombre>
+		</Autoridad>
+	</Autoridades>
+	<Extracto>
+		<Modalidad>MATUTINA</Modalidad>
+		<Suerte>
+			<N01>2141</N01>
+			<N02>7401</N02>
+			<N03>8156</N03>
+			<N04>9873</N04>
+			<N05>9002</N05>
+			<N06>7932</N06>
+			<N07>5203</N07>
+			<N08>2922</N08>
+			<N09>1935</N09>
+			<N10>3995</N10>
+			<N11>9677</N11>
+			<N12>1652</N12>
+			<N13>3499</N13>
+			<N14>1293</N14>
+			<N15>9639</N15>
+			<N16>3046</N16>
+			<N17>4627</N17>
+			<N18>9632</N18>
+			<N19>6159</N19>
+			<N20>2244</N20>
+			<Letras>U F G X</Letras>
+		</Suerte>
+	</Extracto>
+	<S.E.U.O.>Salvo Error u Omisión</S.E.U.O.>
+</DatosSorteo>

@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="es"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Quiniela Dashboard</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&amp;family=JetBrains+Mono:wght@700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "secondary-fixed-dim": "#4edea3",
+                        "on-tertiary-fixed": "#2a1700",
+                        "primary": "#bec6e0",
+                        "primary-fixed-dim": "#bec6e0",
+                        "outline-variant": "#45464d",
+                        "error": "#ffb4ab",
+                        "on-tertiary": "#472a00",
+                        "surface-dim": "#051424",
+                        "surface-variant": "#273647",
+                        "on-primary-container": "#798098",
+                        "on-primary": "#283044",
+                        "on-surface": "#d4e4fa",
+                        "on-tertiary-container": "#b47300",
+                        "surface-container-highest": "#273647",
+                        "surface-bright": "#2c3a4c",
+                        "inverse-surface": "#d4e4fa",
+                        "surface-container-lowest": "#010f1f",
+                        "on-background": "#d4e4fa",
+                        "on-secondary-fixed": "#002113",
+                        "on-error-container": "#ffdad6",
+                        "outline": "#909097",
+                        "background": "#051424",
+                        "on-secondary-fixed-variant": "#005236",
+                        "secondary": "#4edea3",
+                        "surface-tint": "#bec6e0",
+                        "on-primary-fixed-variant": "#3f465c",
+                        "on-secondary-container": "#00311f",
+                        "secondary-fixed": "#6ffbbe",
+                        "surface": "#051424",
+                        "surface-container-high": "#1c2b3c",
+                        "tertiary": "#ffb95f",
+                        "on-secondary": "#003824",
+                        "tertiary-container": "#251400",
+                        "secondary-container": "#00a572",
+                        "primary-fixed": "#dae2fd",
+                        "on-error": "#690005",
+                        "inverse-on-surface": "#233143",
+                        "surface-container": "#122131",
+                        "surface-container-low": "#0d1c2d",
+                        "on-surface-variant": "#c6c6cd",
+                        "error-container": "#93000a",
+                        "on-tertiary-fixed-variant": "#653e00",
+                        "inverse-primary": "#565e74",
+                        "primary-container": "#0f172a",
+                        "tertiary-fixed-dim": "#ffb95f",
+                        "tertiary-fixed": "#ffddb8",
+                        "on-primary-fixed": "#131b2e"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "lg": "24px",
+                        "md": "16px",
+                        "base": "4px",
+                        "xs": "8px",
+                        "xl": "40px",
+                        "container-margin": "16px",
+                        "gutter": "12px",
+                        "sm": "12px"
+                    },
+                    "fontFamily": {
+                        "body-sm": ["Inter"],
+                        "headline-lg-mobile": ["Inter"],
+                        "body-lg": ["Inter"],
+                        "headline-md": ["Inter"],
+                        "label-caps": ["Inter"],
+                        "display-lg": ["Inter"],
+                        "data-display": ["JetBrains Mono"],
+                        "headline-lg": ["Inter"]
+                    },
+                    "fontSize": {
+                        "body-sm": ["14px", { "lineHeight": "20px", "fontWeight": "400" }],
+                        "headline-lg-mobile": ["24px", { "lineHeight": "32px", "fontWeight": "700" }],
+                        "body-lg": ["16px", { "lineHeight": "24px", "fontWeight": "400" }],
+                        "headline-md": ["20px", { "lineHeight": "28px", "fontWeight": "600" }],
+                        "label-caps": ["12px", { "lineHeight": "16px", "fontWeight": "700" }],
+                        "display-lg": ["48px", { "lineHeight": "56px", "letterSpacing": "-0.02em", "fontWeight": "800" }],
+                        "data-display": ["18px", { "lineHeight": "24px", "letterSpacing": "0.05em", "fontWeight": "700" }],
+                        "headline-lg": ["32px", { "lineHeight": "40px", "fontWeight": "700" }]
+                    }
+                },
+            },
+        }
+    </script>
+<style>
+        .glass-panel {
+            background: rgba(18, 33, 49, 0.7);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        .text-glow {
+            text-shadow: 0 0 10px rgba(255, 185, 95, 0.5);
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background text-on-background min-h-screen pb-24 font-body-lg text-body-lg">
+<!-- TopAppBar -->
+<header class="docked full-width top-0 bg-surface-dim dark:bg-surface-dim border-b border-outline-variant flat no shadows flex justify-between items-center w-full px-container-margin py-xs max-w-7xl mx-auto sticky z-40">
+<div class="flex items-center gap-xs">
+<div class="w-10 h-10 rounded-full bg-surface-container-high overflow-hidden">
+<img class="w-full h-full object-cover" data-alt="A generic male profile picture for a modern corporate application. The man is wearing a dark suit with a slight green tint, set against a dark blue background. The style is professional and clean, fitting a dark mode UI." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAVjTShUXsXR0JskpLGxzkFXiSDOaqkm4U5ViZJvOFyjyHXELvnLv3SUSKmHR5zIZiMkyiSZzrYiFoAbqV4H7i1s0_aYhomtjxAkJ-6V0NNB0Da2VWzDbY5A5ssTnUvl0lOrXM6mJhlQE0SEPwmhXyuNPFRga4C0r_3QYFQpa41XqURaS_sah9Zp38OU7Zg4XewVZP65Pk2qHsf4yhMULGeCDQJ4ehSYvkFo9DngBVxQZ8jkpo25zh5dQ"/>
+</div>
+<h1 class="text-headline-md font-headline-md font-bold text-primary dark:text-primary-fixed-dim">Quiniela</h1>
+</div>
+<button class="w-10 h-10 flex items-center justify-center rounded-full hover:bg-surface-variant dark:hover:bg-surface-variant text-primary dark:text-primary-fixed-dim transition-colors">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 0;">notifications</span>
+</button>
+</header>
+<main class="max-w-7xl mx-auto px-container-margin py-md grid grid-cols-4 md:grid-cols-12 gap-gutter">
+<!-- Last Minute Ticker -->
+<div class="col-span-4 md:col-span-12 glass-panel rounded-lg p-xs flex items-center gap-xs overflow-hidden">
+<span class="material-symbols-outlined text-secondary animate-pulse">timer</span>
+<span class="text-body-sm font-body-sm font-bold text-secondary whitespace-nowrap">ÚLTIMO MINUTO:</span>
+<div class="flex-1 overflow-hidden relative">
+<p class="text-body-sm font-body-sm text-on-surface animate-[marquee_15s_linear_infinite] whitespace-nowrap">
+                    Cierre de apuestas La Previa en 15 mins. Pozo estimado $15.000.000...
+                </p>
+</div>
+</div>
+<!-- Quick Action: Generar Número -->
+<div class="col-span-4 md:col-span-12 mt-md">
+<button class="w-full bg-secondary-container hover:bg-secondary text-on-secondary-container rounded-xl py-sm px-md flex items-center justify-center gap-sm shadow-[0_0_24px_rgba(16,185,129,0.3)] transition-all hover:scale-[1.02] hover:shadow-[0_0_32px_rgba(16,185,129,0.5)]">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">casino</span>
+<span class="text-headline-md font-headline-md font-bold">Generar Número de la Suerte</span>
+</button>
+</div>
+<!-- Winning Numbers Area -->
+<div class="col-span-4 md:col-span-8 mt-lg space-y-md">
+<h2 class="text-headline-lg-mobile md:text-headline-lg font-headline-lg-mobile md:font-headline-lg text-primary">Últimos Resultados</h2>
+<div class="grid grid-cols-1 sm:grid-cols-2 gap-md">
+<!-- Nacional Card -->
+<div class="bg-surface-container rounded-xl p-md border border-outline-variant/50 relative overflow-hidden group">
+<div class="absolute top-0 right-0 w-32 h-32 bg-tertiary/10 rounded-full blur-3xl group-hover:bg-tertiary/20 transition-colors"></div>
+<div class="flex justify-between items-start mb-sm relative z-10">
+<div>
+<h3 class="text-headline-md font-headline-md text-on-surface">Nacional</h3>
+<p class="text-body-sm font-body-sm text-on-surface-variant">Matutina - Hoy, 15:00</p>
+</div>
+<span class="material-symbols-outlined text-tertiary">military_tech</span>
+</div>
+<div class="flex justify-center items-center py-md relative z-10">
+<div class="w-24 h-24 rounded-full border-4 border-tertiary flex items-center justify-center shadow-[0_0_15px_rgba(255,185,95,0.4)]">
+<span class="text-display-lg font-data-display text-on-surface text-glow">47</span>
+</div>
+</div>
+</div>
+<!-- Provincia Card -->
+<div class="bg-surface-container rounded-xl p-md border border-outline-variant/50 relative overflow-hidden group">
+<div class="absolute top-0 right-0 w-32 h-32 bg-secondary/10 rounded-full blur-3xl group-hover:bg-secondary/20 transition-colors"></div>
+<div class="flex justify-between items-start mb-sm relative z-10">
+<div>
+<h3 class="text-headline-md font-headline-md text-on-surface">Provincia</h3>
+<p class="text-body-sm font-body-sm text-on-surface-variant">Matutina - Hoy, 15:00</p>
+</div>
+<span class="material-symbols-outlined text-secondary">map</span>
+</div>
+<div class="flex justify-center items-center py-md relative z-10">
+<div class="w-24 h-24 rounded-full border-4 border-secondary flex items-center justify-center shadow-[0_0_15px_rgba(78,222,163,0.4)]">
+<span class="text-display-lg font-data-display text-on-surface">82</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Upcoming Draws -->
+<div class="col-span-4 md:col-span-4 mt-lg">
+<h2 class="text-headline-lg-mobile md:text-headline-lg font-headline-lg-mobile md:font-headline-lg text-primary mb-md">Sorteos de Hoy</h2>
+<div class="bg-surface-container rounded-xl border border-outline-variant/50 flex flex-col">
+<!-- Draw Item: Past -->
+<div class="p-sm flex items-center justify-between border-b border-outline-variant/30 opacity-60">
+<div>
+<h4 class="text-body-lg font-body-lg font-bold text-on-surface">La Previa</h4>
+<p class="text-body-sm font-body-sm text-on-surface-variant">10:15</p>
+</div>
+<span class="text-body-sm font-body-sm text-on-surface-variant">Finalizado</span>
+</div>
+<!-- Draw Item: Past -->
+<div class="p-sm flex items-center justify-between border-b border-outline-variant/30 opacity-60">
+<div>
+<h4 class="text-body-lg font-body-lg font-bold text-on-surface">Primera</h4>
+<p class="text-body-sm font-body-sm text-on-surface-variant">12:00</p>
+</div>
+<span class="text-body-sm font-body-sm text-on-surface-variant">Finalizado</span>
+</div>
+<!-- Draw Item: Active/Next -->
+<div class="p-sm flex items-center justify-between border-b border-outline-variant/30 bg-surface-container-high border-l-4 border-l-secondary relative overflow-hidden">
+<div class="absolute inset-0 bg-gradient-to-r from-secondary/10 to-transparent"></div>
+<div class="relative z-10">
+<h4 class="text-body-lg font-body-lg font-bold text-secondary">Matutina</h4>
+<p class="text-body-sm font-body-sm text-on-surface-variant">15:00</p>
+</div>
+<div class="relative z-10 flex items-center gap-base">
+<span class="w-2 h-2 rounded-full bg-secondary animate-pulse"></span>
+<span class="text-body-sm font-body-sm font-bold text-secondary">En vivo</span>
+</div>
+</div>
+<!-- Draw Item: Upcoming -->
+<div class="p-sm flex items-center justify-between border-b border-outline-variant/30">
+<div>
+<h4 class="text-body-lg font-body-lg font-bold text-on-surface">Vespertina</h4>
+<p class="text-body-sm font-body-sm text-on-surface-variant">18:00</p>
+</div>
+<span class="text-body-sm font-body-sm text-on-surface-variant">Próximo</span>
+</div>
+<!-- Draw Item: Upcoming -->
+<div class="p-sm flex items-center justify-between">
+<div>
+<h4 class="text-body-lg font-body-lg font-bold text-on-surface">Nocturna</h4>
+<p class="text-body-sm font-body-sm text-on-surface-variant">21:00</p>
+</div>
+<span class="text-body-sm font-body-sm text-on-surface-variant">Hoy</span>
+</div>
+</div>
+</div>
+</main>
+<!-- BottomNavBar (Mobile Only based on layout logic, but keeping as per prompt requirements for shell) -->
+<nav class="docked full-width bottom-0 rounded-t-xl bg-surface-container dark:bg-surface-container-highest backdrop-blur-md shadow-[0_-4px_24px_rgba(16,185,129,0.15)] fixed bottom-0 left-0 w-full z-50 flex justify-around items-center px-4 pb-4 pt-2 md:hidden">
+<!-- Active: Dashboard -->
+<a class="flex flex-col items-center justify-center bg-secondary-container dark:bg-on-secondary-fixed-variant text-on-secondary-container dark:text-secondary-fixed rounded-full px-4 py-1 scale-110 transition-all duration-200" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">dashboard</span>
+<span class="text-label-caps font-label-caps mt-1">Dashboard</span>
+</a>
+<!-- Inactive: Results -->
+<a class="flex flex-col items-center justify-center text-on-surface-variant dark:text-outline p-2 hover:text-secondary dark:hover:text-secondary-fixed transition-colors" href="#">
+<span class="material-symbols-outlined">history</span>
+<span class="text-label-caps font-label-caps mt-1">Results</span>
+</a>
+<!-- Inactive: Generator -->
+<a class="flex flex-col items-center justify-center text-on-surface-variant dark:text-outline p-2 hover:text-secondary dark:hover:text-secondary-fixed transition-colors" href="#">
+<span class="material-symbols-outlined">casino</span>
+<span class="text-label-caps font-label-caps mt-1">Generator</span>
+</a>
+<!-- Inactive: Stats -->
+<a class="flex flex-col items-center justify-center text-on-surface-variant dark:text-outline p-2 hover:text-secondary dark:hover:text-secondary-fixed transition-colors" href="#">
+<span class="material-symbols-outlined">analytics</span>
+<span class="text-label-caps font-label-caps mt-1">Stats</span>
+</a>
+</nav>
+<style>
+        @keyframes marquee {
+            0% { transform: translateX(100%); }
+            100% { transform: translateX(-100%); }
+        }
+    </style>
+</body></html>
