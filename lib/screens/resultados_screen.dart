@@ -20,17 +20,19 @@ class ResultadosScreen extends StatefulWidget {
     super.key,
     required this.repositorio,
     required this.preferencias,
-  });
+    DateTime Function()? reloj,
+  }) : reloj = reloj ?? ahoraEnArgentina;
 
   final QuinielaRepository repositorio;
   final PreferenciasLoterias preferencias;
+  final DateTime Function() reloj;
 
   @override
   State<ResultadosScreen> createState() => _ResultadosScreenState();
 }
 
 class _ResultadosScreenState extends State<ResultadosScreen> {
-  DateTime _fecha = ahoraEnArgentina();
+  late DateTime _fecha = widget.reloj();
   TurnoSorteo? _turno;
 
   /// Null = todas las que sigue el usuario.
@@ -71,7 +73,7 @@ class _ResultadosScreenState extends State<ResultadosScreen> {
   }
 
   bool get _esHoy {
-    final hoy = ahoraEnArgentina();
+    final hoy = widget.reloj();
     return _fecha.year == hoy.year &&
         _fecha.month == hoy.month &&
         _fecha.day == hoy.day;
@@ -81,14 +83,14 @@ class _ResultadosScreenState extends State<ResultadosScreen> {
   /// futuro.
   void _mover(int dias) {
     final nueva = _fecha.add(Duration(days: dias));
-    final hoy = ahoraEnArgentina();
+    final hoy = widget.reloj();
     if (nueva.isAfter(DateTime(hoy.year, hoy.month, hoy.day))) return;
     _fecha = nueva;
     _recargar();
   }
 
   Future<void> _elegirFecha() async {
-    final hoy = ahoraEnArgentina();
+    final hoy = widget.reloj();
     final elegida = await showDatePicker(
       context: context,
       initialDate: _fecha,
