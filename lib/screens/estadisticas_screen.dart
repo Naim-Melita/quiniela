@@ -6,6 +6,9 @@ import '../models/sorteo.dart';
 import '../theme/app_colors.dart';
 import '../theme/app_theme.dart';
 import '../widgets/app_scaffold.dart';
+import '../widgets/banner_anuncio.dart';
+import '../widgets/controles.dart';
+import '../widgets/esqueleto.dart';
 
 /// Numeros calientes y frios sobre una ventana de dias.
 class EstadisticasScreen extends StatefulWidget {
@@ -23,10 +26,10 @@ class EstadisticasScreen extends StatefulWidget {
 }
 
 class _EstadisticasScreenState extends State<EstadisticasScreen> {
-  // 90 dias contra la fuente real serian ~900 sorteos: se probo y el spinner no
-  // termina nunca. La ventana arranca en 7, que carga en segundos, y el techo
-  // queda en 30.
-  static const _ventanas = [7, 14, 30];
+  // 90 dias contra la fuente real serian ~900 sorteos: se probo y no termina
+  // nunca. La ventana arranca en 7, que carga en segundos, y el techo queda
+  // en 30.
+  static const _ventanas = {7: '7 dias', 14: '14 dias', 30: '30 dias'};
 
   int _dias = 7;
   late Future<List<FrecuenciaNumero>> _frecuencias;
@@ -81,6 +84,11 @@ class _EstadisticasScreenState extends State<EstadisticasScreen> {
               120,
             ),
             children: [
+              // Arriba de todo: es la unica posicion que se ve sin scrollear.
+              // Va antes del titulo y separado del selector de dias, que es el
+              // unico control de la pantalla.
+              const BannerAnuncio(),
+              const SizedBox(height: AppSpacing.xs),
               const TituloSeccion('Estadisticas'),
               const SizedBox(height: AppSpacing.base),
               Text(
@@ -92,21 +100,19 @@ class _EstadisticasScreenState extends State<EstadisticasScreen> {
                 ),
               ),
               const SizedBox(height: AppSpacing.md),
-              _SelectorVentana(
-                dias: _dias,
+              SelectorSegmentado<int>(
+                etiqueta: 'Ventana de analisis',
                 opciones: _ventanas,
-                onCambio: _cambiarVentana,
+                seleccionada: _dias,
+                onSeleccion: _cambiarVentana,
               ),
               const SizedBox(height: AppSpacing.lg),
               if (cargando)
-                const Padding(
-                  padding: EdgeInsets.all(AppSpacing.xl),
-                  child: Center(
-                    child: CircularProgressIndicator(
-                      color: AppColors.secondary,
-                    ),
-                  ),
-                )
+                const _EsqueletoEstadisticas()
+              // Sin esta rama un fallo de red pinta las tarjetas vacias y
+              // "Sobre 0 sorteos analizados", sin manera de reintentar.
+              else if (snapshot.hasError)
+                _FalloDeCarga(onReintentar: _recargar)
               else ...[
                 _TarjetaNumeros(
                   titulo: 'Numeros calientes',
@@ -139,53 +145,120 @@ class _EstadisticasScreenState extends State<EstadisticasScreen> {
   }
 }
 
-class _SelectorVentana extends StatelessWidget {
-  const _SelectorVentana({
-    required this.dias,
-    required this.opciones,
-    required this.onCambio,
-  });
-
-  final int dias;
-  final List<int> opciones;
-  final ValueChanged<int> onCambio;
+/// Silueta de las tres tarjetas mientras se juntan los sorteos.
+///
+/// Aca la espera es de las largas de la app (30 dias son cientos de sorteos),
+/// asi que importa que se vea que viene y con que forma.
+class _EsqueletoEstadisticas extends StatelessWidget {
+  const _EsqueletoEstadisticas();
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.all(AppSpacing.base),
-      decoration: BoxDecoration(
-        color: AppColors.surfaceContainerLowest,
-        borderRadius: AppRadius.full,
-      ),
-      child: Row(
+    return EsqueletoDeLista(
+      etiqueta: 'Calculando las estadisticas',
+      child: Column(
         children: [
-          for (final opcion in opciones)
-            Expanded(
-              child: GestureDetector(
-                onTap: () => onCambio(opcion),
-                child: AnimatedContainer(
-                  duration: const Duration(milliseconds: 180),
-                  padding: const EdgeInsets.symmetric(vertical: AppSpacing.xs),
-                  decoration: BoxDecoration(
-                    color: opcion == dias
-                        ? AppColors.secondaryContainer
-                        : Colors.transparent,
-                    borderRadius: AppRadius.full,
+          for (var tarjeta = 0; tarjeta < 2; tarjeta++) ...[
+            TarjetaSuperficie(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Row(
+                    children: [
+                      Esqueleto(alto: 24, ancho: 24, radio: AppRadius.full),
+                      SizedBox(width: AppSpacing.xs),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Esqueleto(alto: 20, ancho: 160),
+                            SizedBox(height: AppSpacing.base),
+                            Esqueleto(alto: 14, ancho: 200),
+                          ],
+                        ),
+                      ),
+                    ],
                   ),
-                  child: Text(
-                    '$opcion dias',
-                    textAlign: TextAlign.center,
-                    style: AppText.bodySm.copyWith(
-                      fontWeight: FontWeight.bold,
-                      color: opcion == dias
-                          ? AppColors.onSecondaryContainer
-                          : AppColors.onSurfaceVariant,
-                    ),
+                  const SizedBox(height: AppSpacing.md),
+                  Wrap(
+                    spacing: AppSpacing.xs,
+                    runSpacing: AppSpacing.xs,
+                    children: [
+                      for (var i = 0; i < 6; i++)
+                        const Esqueleto(
+                          alto: 72,
+                          ancho: 72,
+                          radio: AppRadius.allLg,
+                        ),
+                    ],
                   ),
-                ),
+                ],
               ),
             ),
+            const SizedBox(height: AppSpacing.md),
+          ],
+          TarjetaSuperficie(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Esqueleto(alto: 20, ancho: 200),
+                const SizedBox(height: AppSpacing.md),
+                for (var i = 0; i < 6; i++)
+                  const Padding(
+                    padding: EdgeInsets.only(bottom: AppSpacing.xs),
+                    child: Row(
+                      children: [
+                        Esqueleto(alto: 16, ancho: 28),
+                        SizedBox(width: AppSpacing.xs),
+                        Expanded(
+                          child: Esqueleto(alto: 10, radio: AppRadius.full),
+                        ),
+                        SizedBox(width: AppSpacing.xs),
+                        Esqueleto(alto: 14, ancho: 32),
+                      ],
+                    ),
+                  ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// No se pudo armar la estadistica. Distinto de una ventana sin sorteos.
+class _FalloDeCarga extends StatelessWidget {
+  const _FalloDeCarga({required this.onReintentar});
+
+  final VoidCallback onReintentar;
+
+  @override
+  Widget build(BuildContext context) {
+    return TarjetaSuperficie(
+      child: Column(
+        children: [
+          const Icon(Icons.cloud_off, size: 32, color: AppColors.error),
+          const SizedBox(height: AppSpacing.xs),
+          Text(
+            'No pudimos armar las estadisticas',
+            textAlign: TextAlign.center,
+            style: AppText.bodyLg.copyWith(color: AppColors.onSurface),
+          ),
+          const SizedBox(height: AppSpacing.base),
+          Text(
+            'Hacen falta los resultados del sitio oficial. Revisa la conexion '
+            'y volve a probar.',
+            textAlign: TextAlign.center,
+            style: AppText.bodySm.copyWith(color: AppColors.onSurfaceVariant),
+          ),
+          const SizedBox(height: AppSpacing.xs),
+          TextButton.icon(
+            onPressed: onReintentar,
+            icon: const Icon(Icons.refresh, size: 18),
+            label: const Text('Reintentar'),
+            style: TextButton.styleFrom(foregroundColor: AppColors.secondary),
+          ),
         ],
       ),
     );
@@ -244,32 +317,40 @@ class _TarjetaNumeros extends StatelessWidget {
             runSpacing: AppSpacing.xs,
             children: [
               for (final f in numeros)
-                Container(
-                  width: 72,
-                  padding: const EdgeInsets.symmetric(
-                    vertical: AppSpacing.xs,
-                  ),
-                  decoration: BoxDecoration(
-                    color: acento.withValues(alpha: 0.12),
-                    borderRadius: AppRadius.allLg,
-                    border: Border.all(
-                      color: acento.withValues(alpha: 0.4),
+                Semantics(
+                  label: 'Numero ${f.numero}, salio ${f.apariciones} veces',
+                  excludeSemantics: true,
+                  child: Container(
+                    // minWidth y no width: con el texto al 200% el numero de
+                    // dos cifras ya no entra en 72px fijos.
+                    constraints: const BoxConstraints(minWidth: 72),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: AppSpacing.xs,
+                      vertical: AppSpacing.xs,
                     ),
-                  ),
-                  child: Column(
-                    children: [
-                      Text(
-                        f.numero,
-                        style: AppText.data(24).copyWith(color: acento),
+                    decoration: BoxDecoration(
+                      color: acento.withValues(alpha: 0.12),
+                      borderRadius: AppRadius.allLg,
+                      border: Border.all(
+                        color: acento.withValues(alpha: 0.4),
                       ),
-                      const SizedBox(height: AppSpacing.base),
-                      Text(
-                        '${f.apariciones}x',
-                        style: AppText.labelCaps.copyWith(
-                          color: AppColors.onSurfaceVariant,
+                    ),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text(
+                          f.numero,
+                          style: AppText.data(24).copyWith(color: acento),
                         ),
-                      ),
-                    ],
+                        const SizedBox(height: AppSpacing.base),
+                        Text(
+                          '${f.apariciones}x',
+                          style: AppText.labelCaps.copyWith(
+                            color: AppColors.onSurfaceVariant,
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
                 ),
             ],
@@ -305,43 +386,42 @@ class _TarjetaRanking extends StatelessWidget {
           for (final f in frecuencias)
             Padding(
               padding: const EdgeInsets.only(bottom: AppSpacing.xs),
-              child: Row(
-                children: [
-                  SizedBox(
-                    width: 36,
-                    child: Text(
+              child: Semantics(
+                label: 'Numero ${f.numero}, ${f.apariciones} apariciones',
+                excludeSemantics: true,
+                child: Row(
+                  children: [
+                    Text(
                       f.numero,
                       style: AppText.dataDisplay.copyWith(
                         color: AppColors.tertiary,
                         fontSize: 16,
                       ),
                     ),
-                  ),
-                  Expanded(
-                    child: ClipRRect(
-                      borderRadius: AppRadius.full,
-                      child: LinearProgressIndicator(
-                        value: maximo == 0 ? 0 : f.apariciones / maximo,
-                        minHeight: 10,
-                        backgroundColor: AppColors.surfaceContainerLowest,
-                        valueColor: const AlwaysStoppedAnimation(
-                          AppColors.secondary,
+                    const SizedBox(width: AppSpacing.xs),
+                    Expanded(
+                      child: ClipRRect(
+                        borderRadius: AppRadius.full,
+                        child: LinearProgressIndicator(
+                          value: maximo == 0 ? 0 : f.apariciones / maximo,
+                          minHeight: 10,
+                          backgroundColor: AppColors.surfaceContainerLowest,
+                          valueColor: const AlwaysStoppedAnimation(
+                            AppColors.secondary,
+                          ),
                         ),
                       ),
                     ),
-                  ),
-                  const SizedBox(width: AppSpacing.xs),
-                  SizedBox(
-                    width: 40,
-                    child: Text(
+                    const SizedBox(width: AppSpacing.xs),
+                    Text(
                       '${f.apariciones}',
                       textAlign: TextAlign.right,
                       style: AppText.bodySm.copyWith(
                         color: AppColors.onSurfaceVariant,
                       ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
             ),
         ],

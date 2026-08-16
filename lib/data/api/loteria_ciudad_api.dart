@@ -145,7 +145,12 @@ class LoteriaCiudadApi {
 
     final xml = await _get(uri, aceptar404: true);
     if (xml == null || xml.trim().isEmpty) return null;
-    return parsearExtractoXml(xml, loteria: loteria, fechaEsperada: fecha);
+    return parsearExtractoXml(
+      xml,
+      loteria: loteria,
+      fechaEsperada: fecha,
+      turnoEsperado: turno,
+    );
   }
 
   /// Visible para tests: parsea el XML del extracto oficial.
@@ -153,6 +158,7 @@ class LoteriaCiudadApi {
     String xml, {
     required Loteria loteria,
     required DateTime fechaEsperada,
+    required TurnoSorteo turnoEsperado,
   }) {
     final XmlDocument doc;
     try {
@@ -187,12 +193,16 @@ class LoteriaCiudadApi {
     return ResultadoSorteo(
       loteria: loteria,
       // El turno se toma del propio extracto cuando se puede reconocer; si el
-      // XML trae una modalidad que no mapea, se cae a la que se pidio.
+      // XML trae una modalidad que no mapea, se cae a [turnoEsperado], que es el
+      // que se pidio. El fallback importa mas de lo que parece: el archivo se
+      // direcciona por turno, y devolver otro haria que el repositorio guarde en
+      // cache con una clave distinta de la que consulta (nunca acertaria) y que
+      // la pizarra quede rotulada con un turno que no es.
       turno: _turnoDesdeModalidad(modalidad) ??
           _turnoDesdeHora(
             doc.findAllElements('HoraSorteo').firstOrNull?.innerText.trim(),
           ) ??
-          TurnoSorteo.matutina,
+          turnoEsperado,
       fecha: DateTime(fechaEsperada.year, fechaEsperada.month, fechaEsperada.day),
       numeros: numeros,
       letras: doc.findAllElements('Letras').firstOrNull?.innerText.trim(),
@@ -319,12 +329,12 @@ class LoteriaCiudadApi {
     if (respuesta.statusCode != 200) {
       throw QuinielaApiException('$uri respondio ${respuesta.statusCode}');
     }
-    return _decodificar(respuesta)!;
+    return _decodificar(respuesta);
   }
 
   /// El sitio no declara charset en todas las respuestas y http.dart cae a
   /// latin-1 cuando falta. Se intenta UTF-8 primero, que es lo que manda.
-  String? _decodificar(http.Response respuesta) {
+  String _decodificar(http.Response respuesta) {
     try {
       return utf8.decode(respuesta.bodyBytes);
     } on FormatException {

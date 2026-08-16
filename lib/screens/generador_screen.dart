@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:math';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -10,6 +11,8 @@ import '../models/sorteo.dart';
 import '../theme/app_colors.dart';
 import '../theme/app_theme.dart';
 import '../widgets/app_scaffold.dart';
+import '../widgets/banner_anuncio.dart';
+import '../widgets/controles.dart';
 
 /// Generador de jugadas + diccionario de suenos.
 class GeneradorScreen extends StatefulWidget {
@@ -32,17 +35,28 @@ class _GeneradorScreenState extends State<GeneradorScreen> {
   Jugada? _jugada;
 
   /// Digitos que se muestran; durante el "sorteo" van cambiando al azar.
-  List<String> _digitos = List.filled(2, '-');
+  ///
+  /// Va en un notifier y no en el State: la ruleta los cambia cada 60 ms, y con
+  /// setState cada uno de esos frames reconstruia el ListView entero, incluidas
+  /// las ~100 filas del diccionario de suenos. Asi solo se rearma la fila de
+  /// casilleros.
+  final _digitos = ValueNotifier<List<String>>(List.filled(2, '-'));
   bool _sorteando = false;
   Timer? _scramble;
   Timer? _fin;
 
-  late Future<List<Sueno>> _suenos;
+  /// Suenos que se estan mostrando y si todavia no llego la primera tanda.
+  ///
+  /// Se guarda la lista y no un Future: cada tecla creaba un Future nuevo y el
+  /// FutureBuilder volvia al estado "waiting", asi que la lista parpadeaba a
+  /// spinner en cada pulsacion sobre un filtro que es de memoria.
+  List<Sueno> _suenos = const [];
+  bool _cargandoSuenos = true;
 
   @override
   void initState() {
     super.initState();
-    _suenos = widget.repositorio.buscarSuenos('');
+    _buscar('');
   }
 
   @override
@@ -50,6 +64,7 @@ class _GeneradorScreenState extends State<GeneradorScreen> {
     _scramble?.cancel();
     _fin?.cancel();
     _buscador.dispose();
+    _digitos.dispose();
     super.dispose();
   }
 
@@ -57,11 +72,11 @@ class _GeneradorScreenState extends State<GeneradorScreen> {
     if (cifras == _cifras) return;
     _scramble?.cancel();
     _fin?.cancel();
+    _digitos.value = List.filled(cifras, '-');
     setState(() {
       _cifras = cifras;
       _jugada = null;
       _sorteando = false;
-      _digitos = List.filled(cifras, '-');
     });
   }
 
@@ -78,21 +93,19 @@ class _GeneradorScreenState extends State<GeneradorScreen> {
     // Fase de "ruleta": los digitos rotan al azar y despues caen en el valor
     // real. Es puro efecto visual; el numero ya salio del repositorio.
     _scramble = Timer.periodic(_intervaloScramble, (_) {
-      setState(() {
-        _digitos = List.generate(
-          _cifras,
-          (_) => _random.nextInt(10).toString(),
-        );
-      });
+      _digitos.value = List.generate(
+        _cifras,
+        (_) => _random.nextInt(10).toString(),
+      );
     });
 
     _fin = Timer(_duracionSorteo, () {
       _scramble?.cancel();
       HapticFeedback.heavyImpact();
+      _digitos.value = jugada.numero.split('');
       setState(() {
         _sorteando = false;
         _jugada = jugada;
-        _digitos = jugada.numero.split('');
       });
     });
   }
@@ -110,12 +123,15 @@ class _GeneradorScreenState extends State<GeneradorScreen> {
     );
   }
 
-  void _buscar(String consulta) {
-    // Ojo: el cuerpo de setState no puede devolver un Future, y una asignacion
-    // evalua al valor asignado. Con cuerpo de bloque devuelve void.
-    final resultados = widget.repositorio.buscarSuenos(consulta);
+  Future<void> _buscar(String consulta) async {
+    final resultados = await widget.repositorio.buscarSuenos(consulta);
+    if (!mounted) return;
+    // Una respuesta vieja puede llegar despues de una mas nueva; se descarta
+    // para que la lista no quede mostrando el filtro anterior.
+    if (consulta != _buscador.text) return;
     setState(() {
       _suenos = resultados;
+      _cargandoSuenos = false;
     });
   }
 
@@ -124,11 +140,11 @@ class _GeneradorScreenState extends State<GeneradorScreen> {
     _scramble?.cancel();
     _fin?.cancel();
     HapticFeedback.selectionClick();
+    _digitos.value = sueno.numero.split('');
     setState(() {
       _cifras = 2;
       _sorteando = false;
       _jugada = Jugada(numero: sueno.numero, generadaEn: ahoraEnArgentina());
-      _digitos = sueno.numero.split('');
     });
   }
 
@@ -162,54 +178,48 @@ class _GeneradorScreenState extends State<GeneradorScreen> {
             onCopiar: _copiar,
           ),
           const SizedBox(height: AppSpacing.lg),
+          // Entre el generador y el diccionario. Es el corte de seccion mas
+          // limpio de la pantalla y deja el anuncio lejos del boton "Generar":
+          // un banner pegado al boton que la gente toca a repeticion es la
+          // receta del clic accidental.
+          const BannerAnuncio(),
+          const SizedBox(height: AppSpacing.xs),
           const TituloSeccion('Diccionario de Suenos'),
           const SizedBox(height: AppSpacing.sm),
           _Buscador(controlador: _buscador, onCambio: _buscar),
           const SizedBox(height: AppSpacing.md),
-          FutureBuilder<List<Sueno>>(
-            future: _suenos,
-            builder: (context, snapshot) {
-              if (snapshot.connectionState != ConnectionState.done) {
-                return const Padding(
-                  padding: EdgeInsets.all(AppSpacing.lg),
-                  child: Center(
-                    child: CircularProgressIndicator(
-                      color: AppColors.secondary,
+          if (_cargandoSuenos)
+            const Padding(
+              padding: EdgeInsets.all(AppSpacing.lg),
+              child: Center(
+                child: CircularProgressIndicator(color: AppColors.secondary),
+              ),
+            )
+          else if (_suenos.isEmpty)
+            _SinCoincidencias(consulta: _buscador.text)
+          else ...[
+            if (_buscador.text.trim().isEmpty)
+              Padding(
+                padding: const EdgeInsets.only(bottom: AppSpacing.xs),
+                child: Align(
+                  alignment: Alignment.centerLeft,
+                  child: Text(
+                    'POPULARES',
+                    style: AppText.labelCaps.copyWith(
+                      color: AppColors.outline,
                     ),
                   ),
-                );
-              }
-              final suenos = snapshot.data ?? const [];
-              if (suenos.isEmpty) {
-                return _SinCoincidencias(consulta: _buscador.text);
-              }
-              return Column(
-                children: [
-                  if (_buscador.text.trim().isEmpty)
-                    Padding(
-                      padding: const EdgeInsets.only(bottom: AppSpacing.xs),
-                      child: Align(
-                        alignment: Alignment.centerLeft,
-                        child: Text(
-                          'POPULARES',
-                          style: AppText.labelCaps.copyWith(
-                            color: AppColors.outline,
-                          ),
-                        ),
-                      ),
-                    ),
-                  for (final sueno in suenos)
-                    Padding(
-                      padding: const EdgeInsets.only(bottom: AppSpacing.xs),
-                      child: _FilaSueno(
-                        sueno: sueno,
-                        onJugar: () => _jugarSueno(sueno),
-                      ),
-                    ),
-                ],
-              );
-            },
-          ),
+                ),
+              ),
+            for (final sueno in _suenos)
+              Padding(
+                padding: const EdgeInsets.only(bottom: AppSpacing.xs),
+                child: _FilaSueno(
+                  sueno: sueno,
+                  onJugar: () => _jugarSueno(sueno),
+                ),
+              ),
+          ],
         ],
       ),
     );
@@ -228,7 +238,11 @@ class _TarjetaGenerador extends StatelessWidget {
   });
 
   final int cifras;
-  final List<String> digitos;
+
+  /// Los digitos cambian ~12 veces por segundo durante la ruleta, asi que se
+  /// escuchan aparte: solo se rearma esta fila, no la pantalla entera.
+  final ValueListenable<List<String>> digitos;
+
   final bool sorteando;
   final bool hayJugada;
   final ValueChanged<int> onCambiarCifras;
@@ -240,16 +254,46 @@ class _TarjetaGenerador extends StatelessWidget {
     return TarjetaSuperficie(
       child: Column(
         children: [
-          _SelectorCifras(cifras: cifras, onCambio: onCambiarCifras),
+          SelectorSegmentado<int>(
+            etiqueta: 'Cuantas cifras jugar',
+            opciones: const {
+              1: '1 cifra',
+              2: '2 cifras',
+              3: '3 cifras',
+              4: '4 cifras',
+            },
+            seleccionada: cifras,
+            onSeleccion: onCambiarCifras,
+          ),
           const SizedBox(height: AppSpacing.lg),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              for (var i = 0; i < digitos.length; i++) ...[
-                if (i > 0) const SizedBox(width: AppSpacing.xs),
-                _SlotDigito(digito: digitos[i], activo: sorteando),
-              ],
-            ],
+          // El ancho del casillero sale del espacio disponible: con cuatro
+          // cifras fijas en 64px, la fila desbordaba 26px en un telefono de
+          // 320px. Se reparte lo que hay y se le pone un techo para que con una
+          // sola cifra no quede un cuadrado gigante.
+          ValueListenableBuilder<List<String>>(
+            valueListenable: digitos,
+            builder: (context, valores, _) => LayoutBuilder(
+              builder: (context, restricciones) {
+                final separaciones = AppSpacing.xs * (valores.length - 1);
+                final lado = ((restricciones.maxWidth - separaciones) /
+                        valores.length)
+                    .clamp(44.0, 64.0);
+
+                return Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    for (var i = 0; i < valores.length; i++) ...[
+                      if (i > 0) const SizedBox(width: AppSpacing.xs),
+                      _SlotDigito(
+                        digito: valores[i],
+                        activo: sorteando,
+                        lado: lado,
+                      ),
+                    ],
+                  ],
+                );
+              },
+            ),
           ),
           const SizedBox(height: AppSpacing.lg),
           Row(
@@ -297,63 +341,19 @@ class _TarjetaGenerador extends StatelessWidget {
   }
 }
 
-class _SelectorCifras extends StatelessWidget {
-  const _SelectorCifras({required this.cifras, required this.onCambio});
-
-  final int cifras;
-  final ValueChanged<int> onCambio;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.all(AppSpacing.base),
-      decoration: BoxDecoration(
-        color: AppColors.surfaceContainerLowest,
-        borderRadius: AppRadius.full,
-      ),
-      child: Row(
-        children: [
-          for (var n = 1; n <= 4; n++)
-            Expanded(
-              child: GestureDetector(
-                onTap: () => onCambio(n),
-                child: AnimatedContainer(
-                  duration: const Duration(milliseconds: 180),
-                  curve: Curves.easeOut,
-                  padding: const EdgeInsets.symmetric(
-                    vertical: AppSpacing.xs,
-                  ),
-                  decoration: BoxDecoration(
-                    color: n == cifras
-                        ? AppColors.secondaryContainer
-                        : Colors.transparent,
-                    borderRadius: AppRadius.full,
-                  ),
-                  child: Text(
-                    '$n ${n == 1 ? 'cifra' : 'cifras'}',
-                    textAlign: TextAlign.center,
-                    style: AppText.bodySm.copyWith(
-                      fontWeight: FontWeight.bold,
-                      color: n == cifras
-                          ? AppColors.onSecondaryContainer
-                          : AppColors.onSurfaceVariant,
-                    ),
-                  ),
-                ),
-              ),
-            ),
-        ],
-      ),
-    );
-  }
-}
-
 /// Casillero de un digito. Se pinta en dorado cuando el numero ya quedo fijo.
 class _SlotDigito extends StatelessWidget {
-  const _SlotDigito({required this.digito, required this.activo});
+  const _SlotDigito({
+    required this.digito,
+    required this.activo,
+    required this.lado,
+  });
 
   final String digito;
   final bool activo;
+
+  /// Ancho del casillero, que lo decide la fila segun lo que haya disponible.
+  final double lado;
 
   @override
   Widget build(BuildContext context) {
@@ -363,8 +363,8 @@ class _SlotDigito extends StatelessWidget {
         : (definido ? AppColors.tertiary : AppColors.outline);
 
     return Container(
-      width: 64,
-      height: 84,
+      width: lado,
+      height: lado * 1.3,
       decoration: BoxDecoration(
         color: AppColors.surfaceContainerLowest,
         borderRadius: AppRadius.allXl,
@@ -384,7 +384,14 @@ class _SlotDigito extends StatelessWidget {
             : null,
       ),
       alignment: Alignment.center,
-      child: Text(digito, style: AppText.data(40).copyWith(color: color)),
+      // El casillero tiene alto fijo: el digito no puede escalar sin limite.
+      child: MediaQuery.withClampedTextScaling(
+        maxScaleFactor: 1.3,
+        child: Text(
+          digito,
+          style: AppText.data(lado * 0.62).copyWith(color: color),
+        ),
+      ),
     );
   }
 }
@@ -445,13 +452,13 @@ class _FilaSueno extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return InkWell(
+    return TarjetaSuperficie(
       onTap: onJugar,
-      borderRadius: AppRadius.allXl,
-      child: TarjetaSuperficie(
-        padding: const EdgeInsets.all(AppSpacing.sm),
-        child: Row(
-          children: [
+      padding: const EdgeInsets.all(AppSpacing.sm),
+      semantica: '${sueno.nombre}, numero ${sueno.numero}. '
+          'Lo pone como jugada.',
+      child: Row(
+        children: [
             Container(
               width: 48,
               height: 48,
@@ -494,12 +501,11 @@ class _FilaSueno extends StatelessWidget {
                 ],
               ),
             ),
-            const Icon(
-              Icons.chevron_right,
-              color: AppColors.outline,
-            ),
-          ],
-        ),
+          const Icon(
+            Icons.chevron_right,
+            color: AppColors.outline,
+          ),
+        ],
       ),
     );
   }

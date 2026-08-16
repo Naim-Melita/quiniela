@@ -8,6 +8,8 @@ import '../theme/acentos.dart';
 import '../theme/app_colors.dart';
 import '../theme/app_theme.dart';
 import '../widgets/app_scaffold.dart';
+import '../widgets/controles.dart';
+import '../widgets/esqueleto.dart';
 import 'detalle_sorteo_screen.dart';
 
 /// "Fijate si salio el 47": busca una jugada en los sorteos recientes.
@@ -28,7 +30,7 @@ class BuscarNumeroScreen extends StatefulWidget {
 }
 
 class _BuscarNumeroScreenState extends State<BuscarNumeroScreen> {
-  static const _ventanas = [1, 3, 7];
+  static const _ventanas = {1: 'Hoy', 3: 'Ultimos 3', 7: 'Ultimos 7'};
 
   final _controlador = TextEditingController();
 
@@ -133,10 +135,11 @@ class _BuscarNumeroScreenState extends State<BuscarNumeroScreen> {
                   ),
                 ),
                 const SizedBox(height: AppSpacing.sm),
-                _SelectorVentana(
-                  dias: _dias,
+                SelectorSegmentado<int>(
+                  etiqueta: 'Cuantos dias mirar',
                   opciones: _ventanas,
-                  onCambio: _cambiarVentana,
+                  seleccionada: _dias,
+                  onSeleccion: _cambiarVentana,
                 ),
               ],
             ),
@@ -162,8 +165,49 @@ class _BuscarNumeroScreenState extends State<BuscarNumeroScreen> {
       future: futuro,
       builder: (context, snapshot) {
         if (snapshot.connectionState != ConnectionState.done) {
-          return const Center(
-            child: CircularProgressIndicator(color: AppColors.secondary),
+          return EsqueletoDeLista(
+            etiqueta: 'Buscando el $_jugadaBuscada',
+            child: ListView.separated(
+              padding: const EdgeInsets.fromLTRB(
+                AppSpacing.containerMargin,
+                0,
+                AppSpacing.containerMargin,
+                AppSpacing.lg,
+              ),
+              itemCount: 5,
+              separatorBuilder: (_, _) => const SizedBox(height: AppSpacing.xs),
+              itemBuilder: (_, _) => const TarjetaSuperficie(
+                padding: EdgeInsets.all(AppSpacing.sm),
+                child: Row(
+                  children: [
+                    Esqueleto(alto: 20, ancho: 20, radio: AppRadius.full),
+                    SizedBox(width: AppSpacing.xs),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Esqueleto(alto: 16, ancho: 180),
+                          SizedBox(height: AppSpacing.base),
+                          Esqueleto(alto: 14, ancho: 120),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          );
+        }
+
+        // Sin este chequeo, un fallo de red se muestra como "el numero no
+        // salio", que es afirmar algo falso sobre el sorteo.
+        if (snapshot.hasError) {
+          return _Mensaje(
+            icono: Icons.cloud_off,
+            titulo: 'No pudimos buscar el $_jugadaBuscada',
+            detalle: 'No se pudo llegar a los resultados oficiales. Revisa la '
+                'conexion y volve a probar.',
+            onReintentar: _buscar,
           );
         }
 
@@ -283,7 +327,10 @@ class _FilaAparicion extends StatelessWidget {
     final acento = acentoDe(resultado.loteria);
     final fecha = DateFormat('d MMM', 'es').format(resultado.fecha);
 
-    return InkWell(
+    final posiciones = aparicion.posiciones.join(', ');
+
+    return TarjetaSuperficie(
+      padding: const EdgeInsets.all(AppSpacing.sm),
       onTap: () => Navigator.of(context).push(
         MaterialPageRoute<void>(
           builder: (_) => DetalleSorteoScreen(
@@ -292,107 +339,56 @@ class _FilaAparicion extends StatelessWidget {
           ),
         ),
       ),
-      borderRadius: AppRadius.allXl,
-      child: TarjetaSuperficie(
-        padding: const EdgeInsets.all(AppSpacing.sm),
-        child: Row(
-          children: [
-            Icon(resultado.loteria.icono, color: acento, size: 20),
-            const SizedBox(width: AppSpacing.xs),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    '${resultado.loteria.nombre} - ${resultado.turno.nombre}',
-                    style: AppText.bodyLg.copyWith(
-                      color: AppColors.onSurface,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                  Text(
-                    '$fecha - posicion '
-                    '${aparicion.posiciones.join(", ")}',
-                    style: AppText.bodySm.copyWith(
-                      color: AppColors.onSurfaceVariant,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            if (aparicion.aLaCabeza)
-              Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: AppSpacing.xs,
-                  vertical: AppSpacing.base,
-                ),
-                decoration: BoxDecoration(
-                  color: AppColors.tertiary.withValues(alpha: 0.15),
-                  borderRadius: AppRadius.full,
-                  border: Border.all(color: AppColors.tertiary),
-                ),
-                child: Text(
-                  'CABEZA',
-                  style: AppText.labelCaps.copyWith(
-                    color: AppColors.tertiary,
-                  ),
-                ),
-              ),
-            const Icon(Icons.chevron_right, color: AppColors.outline),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class _SelectorVentana extends StatelessWidget {
-  const _SelectorVentana({
-    required this.dias,
-    required this.opciones,
-    required this.onCambio,
-  });
-
-  final int dias;
-  final List<int> opciones;
-  final ValueChanged<int> onCambio;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.all(AppSpacing.base),
-      decoration: BoxDecoration(
-        color: AppColors.surfaceContainerLowest,
-        borderRadius: AppRadius.full,
-      ),
+      semantica: '${resultado.loteria.nombre}, ${resultado.turno.nombre} '
+          'del $fecha. El $jugada salio en '
+          '${aparicion.posiciones.length == 1 ? "la posicion" : "las posiciones"} '
+          '$posiciones'
+          '${aparicion.aLaCabeza ? ", a la cabeza" : ""}. Abre la pizarra.',
       child: Row(
         children: [
-          for (final opcion in opciones)
-            Expanded(
-              child: GestureDetector(
-                onTap: () => onCambio(opcion),
-                child: AnimatedContainer(
-                  duration: const Duration(milliseconds: 180),
-                  padding: const EdgeInsets.symmetric(vertical: AppSpacing.xs),
-                  decoration: BoxDecoration(
-                    color: opcion == dias
-                        ? AppColors.secondaryContainer
-                        : Colors.transparent,
-                    borderRadius: AppRadius.full,
+          Icon(resultado.loteria.icono, color: acento, size: 20),
+          const SizedBox(width: AppSpacing.xs),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  '${resultado.loteria.nombre} - ${resultado.turno.nombre}',
+                  style: AppText.bodyLg.copyWith(
+                    color: AppColors.onSurface,
+                    fontWeight: FontWeight.w600,
                   ),
-                  child: Text(
-                    opcion == 1 ? 'Hoy' : 'Ultimos $opcion dias',
-                    textAlign: TextAlign.center,
-                    style: AppText.bodySm.copyWith(
-                      fontWeight: FontWeight.bold,
-                      color: opcion == dias
-                          ? AppColors.onSecondaryContainer
-                          : AppColors.onSurfaceVariant,
-                    ),
+                ),
+                Text(
+                  '$fecha - posicion $posiciones',
+                  style: AppText.bodySm.copyWith(
+                    color: AppColors.onSurfaceVariant,
                   ),
+                ),
+              ],
+            ),
+          ),
+          if (aparicion.aLaCabeza) ...[
+            const SizedBox(width: AppSpacing.xs),
+            Container(
+              padding: const EdgeInsets.symmetric(
+                horizontal: AppSpacing.xs,
+                vertical: AppSpacing.base,
+              ),
+              decoration: BoxDecoration(
+                color: AppColors.tertiary.withValues(alpha: 0.15),
+                borderRadius: AppRadius.full,
+                border: Border.all(color: AppColors.tertiary),
+              ),
+              child: Text(
+                'CABEZA',
+                style: AppText.labelCaps.copyWith(
+                  color: AppColors.tertiary,
                 ),
               ),
             ),
+          ],
+          const Icon(Icons.chevron_right, color: AppColors.outline),
         ],
       ),
     );
@@ -404,11 +400,15 @@ class _Mensaje extends StatelessWidget {
     required this.icono,
     required this.titulo,
     required this.detalle,
+    this.onReintentar,
   });
 
   final IconData icono;
   final String titulo;
   final String detalle;
+
+  /// Si viene, se muestra un boton para volver a intentar.
+  final VoidCallback? onReintentar;
 
   @override
   Widget build(BuildContext context) {
@@ -418,7 +418,13 @@ class _Mensaje extends StatelessWidget {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(icono, size: 44, color: AppColors.onSurfaceVariant),
+            Icon(
+              icono,
+              size: 44,
+              color: onReintentar == null
+                  ? AppColors.onSurfaceVariant
+                  : AppColors.error,
+            ),
             const SizedBox(height: AppSpacing.xs),
             Text(
               titulo,
@@ -433,6 +439,17 @@ class _Mensaje extends StatelessWidget {
                 color: AppColors.onSurfaceVariant,
               ),
             ),
+            if (onReintentar case final reintentar?) ...[
+              const SizedBox(height: AppSpacing.xs),
+              TextButton.icon(
+                onPressed: reintentar,
+                icon: const Icon(Icons.refresh, size: 18),
+                label: const Text('Reintentar'),
+                style: TextButton.styleFrom(
+                  foregroundColor: AppColors.secondary,
+                ),
+              ),
+            ],
           ],
         ),
       ),

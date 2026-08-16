@@ -115,6 +115,24 @@ void main() {
     expect(find.text('-'), findsNWidgets(4));
   });
 
+  testWidgets('la flecha de dia siguiente vuelve a hoy', (tester) async {
+    // Regresion: con la fecha guardada con hora, volver de ayer a hoy daba
+    // "hoy a las 15:30", que es despues de hoy a la medianoche, y el guard de
+    // "no hay resultados en el futuro" bloqueaba la flecha para siempre.
+    await _cargar(tester);
+    await tester.tap(find.text('Resultados'));
+    await tester.pump(const Duration(milliseconds: 500));
+    expect(find.text('Hoy'), findsOneWidget);
+
+    await tester.tap(find.byTooltip('Dia anterior'));
+    await tester.pump(const Duration(milliseconds: 500));
+    expect(find.text('Hoy'), findsNothing);
+
+    await tester.tap(find.byTooltip('Dia siguiente'));
+    await tester.pump(const Duration(milliseconds: 500));
+    expect(find.text('Hoy'), findsOneWidget);
+  });
+
   testWidgets('buscar en el diccionario filtra los suenos', (tester) async {
     await _cargar(tester);
     await tester.tap(find.text('Generador'));

@@ -32,27 +32,36 @@ class _HomeShellState extends State<HomeShell> {
 
   @override
   Widget build(BuildContext context) {
+    final pantallas = [
+      DashboardScreen(
+        repositorio: widget.repositorio,
+        preferencias: widget.preferencias,
+        onGenerarJugada: () => _irA(2),
+        onVerResultados: () => _irA(1),
+      ),
+      ResultadosScreen(
+        repositorio: widget.repositorio,
+        preferencias: widget.preferencias,
+      ),
+      GeneradorScreen(repositorio: widget.repositorio),
+      EstadisticasScreen(
+        repositorio: widget.repositorio,
+        preferencias: widget.preferencias,
+      ),
+    ];
+
     return Scaffold(
       backgroundColor: AppColors.background,
       extendBody: true,
       body: IndexedStack(
         index: _indice,
         children: [
-          DashboardScreen(
-            repositorio: widget.repositorio,
-            preferencias: widget.preferencias,
-            onGenerarJugada: () => _irA(2),
-            onVerResultados: () => _irA(1),
-          ),
-          ResultadosScreen(
-            repositorio: widget.repositorio,
-            preferencias: widget.preferencias,
-          ),
-          GeneradorScreen(repositorio: widget.repositorio),
-          EstadisticasScreen(
-            repositorio: widget.repositorio,
-            preferencias: widget.preferencias,
-          ),
+          // El IndexedStack construye las cuatro pantallas y pinta una sola,
+          // pero los tickers de las ocultas siguen corriendo: sin el TickerMode,
+          // el ticker de ultimo minuto y el punto de "en vivo" mantienen a la
+          // app pidiendo frames a 60fps mientras se mira otra pestana.
+          for (var i = 0; i < pantallas.length; i++)
+            TickerMode(enabled: i == _indice, child: pantallas[i]),
         ],
       ),
       bottomNavigationBar: _BarraInferior(indice: _indice, onSeleccion: _irA),

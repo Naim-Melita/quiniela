@@ -123,38 +123,49 @@ class _Fila extends StatelessWidget {
       texto = AppColors.onSurface;
     }
 
-    return Row(
-      children: [
-        SizedBox(
-          width: 24,
-          child: Text(
-            '$posicion',
-            style: AppText.labelCaps.copyWith(
-              color: esCabeza ? acento : AppColors.outline,
-            ),
-          ),
-        ),
-        Expanded(
-          child: Container(
-            padding: const EdgeInsets.symmetric(
-              horizontal: AppSpacing.xs,
-              vertical: AppSpacing.base,
-            ),
-            decoration: BoxDecoration(
-              color: fondo,
-              borderRadius: AppRadius.allSm,
-              border: destacada
-                  ? Border.all(color: AppColors.secondary, width: 1.5)
-                  : null,
-            ),
+    // La pizarra es una tabla de veinte filas: se lee "Posicion 3, 4221" en vez
+    // de "3" y "4221" como dos textos sueltos. El acierto y la cabeza se dicen
+    // con palabras, porque hoy solo estan indicados con color.
+    final anuncio = StringBuffer('Posicion $posicion, $numero');
+    if (esCabeza) anuncio.write(', a la cabeza');
+    if (destacada) anuncio.write(', acerto');
+
+    return Semantics(
+      label: anuncio.toString(),
+      excludeSemantics: true,
+      child: Row(
+        children: [
+          SizedBox(
+            width: 24,
             child: Text(
-              numero,
-              textAlign: TextAlign.center,
-              style: AppText.dataDisplay.copyWith(fontSize: 16, color: texto),
+              '$posicion',
+              style: AppText.labelCaps.copyWith(
+                color: esCabeza ? acento : AppColors.outline,
+              ),
             ),
           ),
-        ),
-      ],
+          Expanded(
+            child: Container(
+              padding: const EdgeInsets.symmetric(
+                horizontal: AppSpacing.xs,
+                vertical: AppSpacing.base,
+              ),
+              decoration: BoxDecoration(
+                color: fondo,
+                borderRadius: AppRadius.allSm,
+                border: destacada
+                    ? Border.all(color: AppColors.secondary, width: 1.5)
+                    : null,
+              ),
+              child: Text(
+                numero,
+                textAlign: TextAlign.center,
+                style: AppText.dataDisplay.copyWith(fontSize: 16, color: texto),
+              ),
+            ),
+          ),
+        ],
+      ),
     );
   }
 }

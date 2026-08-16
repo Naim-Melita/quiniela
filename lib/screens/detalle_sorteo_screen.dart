@@ -108,6 +108,7 @@ class DetalleSorteoScreen extends StatelessWidget {
                 BolillaNumero(
                   numero: resultado.cabezaDosCifras,
                   color: acento,
+                  semantica: 'A la cabeza: ${resultado.cabezaDosCifras}',
                 ),
                 const SizedBox(height: AppSpacing.xs),
                 Text(

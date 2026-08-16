@@ -1,0 +1,22 @@
+# Plantilla de las credenciales de firma de release.
+#
+# Copiar a android/key.properties y completar con los valores propios. Ese
+# archivo NO va al repositorio: ya esta en android/.gitignore junto con los .jks.
+#
+# Para generar el keystore (te va a pedir las contrasenas de forma interactiva):
+#
+#   keytool -genkey -v -keystore ~/keys/quiniela24-upload.jks \
+#     -keyalg RSA -keysize 2048 -validity 10000 -alias upload
+#
+# Guardalo fuera del repositorio y hacele copia de seguridad.
+
+# Ruta al keystore. Se resuelve desde la carpeta android/, asi que sirve tanto
+# una ruta relativa ("upload-keystore.jks") como una absoluta.
+storeFile=/Users/TU_USUARIO/keys/quiniela24-upload.jks
+
+# Contrasena del keystore.
+storePassword=
+
+# Alias de la clave y su contrasena.
+keyAlias=upload
+keyPassword=

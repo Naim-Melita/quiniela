@@ -9,6 +9,9 @@ import '../theme/acentos.dart';
 import '../theme/app_colors.dart';
 import '../theme/app_theme.dart';
 import '../widgets/app_scaffold.dart';
+import '../widgets/banner_anuncio.dart';
+import '../widgets/controles.dart';
+import '../widgets/esqueleto.dart';
 import '../widgets/pizarra.dart';
 import 'buscar_numero_screen.dart';
 import 'detalle_sorteo_screen.dart';
@@ -29,8 +32,19 @@ class ResultadosScreen extends StatefulWidget {
   State<ResultadosScreen> createState() => _ResultadosScreenState();
 }
 
+/// Hoy a medianoche, en hora argentina.
+///
+/// Todas las fechas de la pantalla se guardan asi, sin hora. Con la hora puesta,
+/// comparar contra "hoy" para no pasarse al futuro daba falsos positivos: volver
+/// de ayer a hoy quedaba bloqueado porque ayer-a-las-15:30 mas un dia es hoy a
+/// las 15:30, que es despues de hoy a la medianoche.
+DateTime _hoyEnArgentina() {
+  final ahora = ahoraEnArgentina();
+  return DateTime(ahora.year, ahora.month, ahora.day);
+}
+
 class _ResultadosScreenState extends State<ResultadosScreen> {
-  DateTime _fecha = ahoraEnArgentina();
+  DateTime _fecha = _hoyEnArgentina();
   TurnoSorteo? _turno;
 
   /// Null = todas las que sigue el usuario.
@@ -70,25 +84,22 @@ class _ResultadosScreenState extends State<ResultadosScreen> {
     });
   }
 
-  bool get _esHoy {
-    final hoy = ahoraEnArgentina();
-    return _fecha.year == hoy.year &&
-        _fecha.month == hoy.month &&
-        _fecha.day == hoy.day;
-  }
+  bool get _esHoy => _fecha == _hoyEnArgentina();
 
   /// Mueve la fecha [dias] dias. No deja pasar de hoy: no hay resultados en el
   /// futuro.
   void _mover(int dias) {
-    final nueva = _fecha.add(Duration(days: dias));
-    final hoy = ahoraEnArgentina();
-    if (nueva.isAfter(DateTime(hoy.year, hoy.month, hoy.day))) return;
+    // Sumando sobre los campos y no con un Duration: en un telefono con horario
+    // de verano, sumarle 24 horas a una medianoche puede caer en las 23:00 del
+    // dia anterior y dejar la fecha corrida.
+    final nueva = DateTime(_fecha.year, _fecha.month, _fecha.day + dias);
+    if (nueva.isAfter(_hoyEnArgentina())) return;
     _fecha = nueva;
     _recargar();
   }
 
   Future<void> _elegirFecha() async {
-    final hoy = ahoraEnArgentina();
+    final hoy = _hoyEnArgentina();
     final elegida = await showDatePicker(
       context: context,
       initialDate: _fecha,
@@ -148,7 +159,6 @@ class _ResultadosScreenState extends State<ResultadosScreen> {
                 const SizedBox(height: AppSpacing.xs),
                 _FiltroLoterias(
                   seleccionada: _loteria,
-                  disponibles: widget.preferencias.favoritas,
                   onSeleccion: (loteria) {
                     _loteria = loteria;
                     _recargar();
@@ -174,16 +184,24 @@ class _ResultadosScreenState extends State<ResultadosScreen> {
                 future: _resultados,
                 builder: (context, snapshot) {
                   if (snapshot.connectionState != ConnectionState.done) {
-                    return const Center(
-                      child: CircularProgressIndicator(
-                        color: AppColors.secondary,
-                      ),
-                    );
+                    return const _EsqueletoPizarras();
+                  }
+                  // Un fallo no se puede mostrar como "no hay resultados": son
+                  // cosas distintas y la segunda es un dato falso sobre el
+                  // sorteo.
+                  if (snapshot.hasError) {
+                    return _FalloDeCarga(onReintentar: _recargar);
                   }
                   final resultados = snapshot.data ?? const [];
                   if (resultados.isEmpty) {
                     return const _SinResultados();
                   }
+                  // El anuncio va intercalado despues de la primera pizarra:
+                  // ahi hay un corte natural entre tarjetas, y al final de la
+                  // lista no lo veria nadie (son 20 numeros por sorteo).
+                  const posicionDelAnuncio = 1;
+                  final hayAnuncio = resultados.length > posicionDelAnuncio;
+
                   return ListView.separated(
                     padding: const EdgeInsets.fromLTRB(
                       AppSpacing.containerMargin,
@@ -191,11 +209,17 @@ class _ResultadosScreenState extends State<ResultadosScreen> {
                       AppSpacing.containerMargin,
                       120,
                     ),
-                    itemCount: resultados.length,
+                    itemCount: resultados.length + (hayAnuncio ? 1 : 0),
                     separatorBuilder: (_, _) =>
                         const SizedBox(height: AppSpacing.md),
-                    itemBuilder: (context, i) =>
-                        _TarjetaPizarra(resultado: resultados[i]),
+                    itemBuilder: (context, i) {
+                      if (hayAnuncio && i == posicionDelAnuncio) {
+                        return const BannerAnuncio();
+                      }
+                      final indice =
+                          hayAnuncio && i > posicionDelAnuncio ? i - 1 : i;
+                      return _TarjetaPizarra(resultado: resultados[indice]);
+                    },
                   );
                 },
               ),
@@ -280,24 +304,28 @@ class _FiltroTurnos extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return SingleChildScrollView(
-      scrollDirection: Axis.horizontal,
-      child: Row(
-        children: [
-          _Chip(
-            etiqueta: 'Todos',
-            activo: seleccionado == null,
-            onTap: () => onSeleccion(null),
-          ),
-          for (final turno in TurnoSorteo.values) ...[
-            const SizedBox(width: AppSpacing.xs),
-            _Chip(
-              etiqueta: turno.nombre,
-              activo: seleccionado == turno,
-              onTap: () => onSeleccion(turno),
+    return Semantics(
+      container: true,
+      label: 'Filtrar por turno',
+      child: SingleChildScrollView(
+        scrollDirection: Axis.horizontal,
+        child: Row(
+          children: [
+            ChipFiltro(
+              etiqueta: 'Todos',
+              activo: seleccionado == null,
+              onTap: () => onSeleccion(null),
             ),
+            for (final turno in TurnoSorteo.values) ...[
+              const SizedBox(width: AppSpacing.xs),
+              ChipFiltro(
+                etiqueta: turno.nombre,
+                activo: seleccionado == turno,
+                onTap: () => onSeleccion(turno),
+              ),
+            ],
           ],
-        ],
+        ),
       ),
     );
   }
@@ -306,83 +334,38 @@ class _FiltroTurnos extends StatelessWidget {
 class _FiltroLoterias extends StatelessWidget {
   const _FiltroLoterias({
     required this.seleccionada,
-    required this.disponibles,
     required this.onSeleccion,
   });
 
   final Loteria? seleccionada;
-  final List<Loteria> disponibles;
   final ValueChanged<Loteria?> onSeleccion;
 
   @override
   Widget build(BuildContext context) {
-    return SingleChildScrollView(
-      scrollDirection: Axis.horizontal,
-      child: Row(
-        children: [
-          _Chip(
-            etiqueta: 'Mis loterias',
-            activo: seleccionada == null,
-            onTap: () => onSeleccion(null),
-          ),
-          // Se ofrecen todas, no solo las seguidas: sirve para espiar una
-          // loteria puntual sin tener que agregarla a favoritas.
-          for (final loteria in Loteria.values) ...[
-            const SizedBox(width: AppSpacing.xs),
-            _Chip(
-              etiqueta: loteria.nombre,
-              activo: seleccionada == loteria,
-              color: acentoDe(loteria),
-              onTap: () => onSeleccion(loteria),
+    return Semantics(
+      container: true,
+      label: 'Filtrar por loteria',
+      child: SingleChildScrollView(
+        scrollDirection: Axis.horizontal,
+        child: Row(
+          children: [
+            ChipFiltro(
+              etiqueta: 'Mis loterias',
+              activo: seleccionada == null,
+              onTap: () => onSeleccion(null),
             ),
+            // Se ofrecen todas, no solo las seguidas: sirve para espiar una
+            // loteria puntual sin tener que agregarla a favoritas.
+            for (final loteria in Loteria.values) ...[
+              const SizedBox(width: AppSpacing.xs),
+              ChipFiltro(
+                etiqueta: loteria.nombre,
+                activo: seleccionada == loteria,
+                color: acentoDe(loteria),
+                onTap: () => onSeleccion(loteria),
+              ),
+            ],
           ],
-        ],
-      ),
-    );
-  }
-}
-
-class _Chip extends StatelessWidget {
-  const _Chip({
-    required this.etiqueta,
-    required this.activo,
-    required this.onTap,
-    this.color,
-  });
-
-  final String etiqueta;
-  final bool activo;
-  final VoidCallback onTap;
-  final Color? color;
-
-  @override
-  Widget build(BuildContext context) {
-    final acento = color ?? AppColors.secondary;
-    return InkWell(
-      onTap: onTap,
-      borderRadius: AppRadius.full,
-      child: Container(
-        padding: const EdgeInsets.symmetric(
-          horizontal: AppSpacing.md,
-          vertical: AppSpacing.xs,
-        ),
-        decoration: BoxDecoration(
-          color: activo
-              ? acento.withValues(alpha: 0.2)
-              : AppColors.surfaceContainer,
-          borderRadius: AppRadius.full,
-          border: Border.all(
-            color: activo
-                ? acento
-                : AppColors.outlineVariant.withValues(alpha: 0.5),
-          ),
-        ),
-        child: Text(
-          etiqueta,
-          style: AppText.bodySm.copyWith(
-            fontWeight: FontWeight.bold,
-            color: activo ? acento : AppColors.onSurfaceVariant,
-          ),
         ),
       ),
     );
@@ -397,23 +380,111 @@ class _TarjetaPizarra extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return InkWell(
+    return TarjetaSuperficie(
       onTap: () => Navigator.of(context).push(
         MaterialPageRoute<void>(
           builder: (_) => DetalleSorteoScreen(resultado: resultado),
         ),
       ),
-      borderRadius: AppRadius.allXl,
-      child: TarjetaSuperficie(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            EncabezadoSorteo(resultado: resultado),
-            const SizedBox(height: AppSpacing.md),
-            PizarraSorteo(resultado: resultado),
-          ],
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          EncabezadoSorteo(resultado: resultado),
+          const SizedBox(height: AppSpacing.md),
+          PizarraSorteo(resultado: resultado),
+        ],
+      ),
+    );
+  }
+}
+
+/// Silueta de dos pizarras mientras carga el dia.
+class _EsqueletoPizarras extends StatelessWidget {
+  const _EsqueletoPizarras();
+
+  @override
+  Widget build(BuildContext context) {
+    return EsqueletoDeLista(
+      etiqueta: 'Cargando los resultados del dia',
+      child: ListView.separated(
+        padding: const EdgeInsets.fromLTRB(
+          AppSpacing.containerMargin,
+          0,
+          AppSpacing.containerMargin,
+          120,
+        ),
+        itemCount: 2,
+        separatorBuilder: (_, _) => const SizedBox(height: AppSpacing.md),
+        itemBuilder: (_, _) => TarjetaSuperficie(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Row(
+                children: [
+                  Esqueleto(alto: 20, ancho: 20, radio: AppRadius.full),
+                  SizedBox(width: AppSpacing.xs),
+                  Expanded(child: Esqueleto(alto: 20, ancho: 180)),
+                  Esqueleto(alto: 14, ancho: 40),
+                ],
+              ),
+              const SizedBox(height: AppSpacing.md),
+              // Diez filas por columna, como la pizarra real.
+              for (var i = 0; i < 10; i++)
+                const Padding(
+                  padding: EdgeInsets.only(bottom: AppSpacing.base),
+                  child: Row(
+                    children: [
+                      Esqueleto(alto: 14, ancho: 16),
+                      SizedBox(width: AppSpacing.xs),
+                      Expanded(child: Esqueleto(alto: 26)),
+                      SizedBox(width: AppSpacing.sm),
+                      Esqueleto(alto: 14, ancho: 16),
+                      SizedBox(width: AppSpacing.xs),
+                      Expanded(child: Esqueleto(alto: 26)),
+                    ],
+                  ),
+                ),
+            ],
+          ),
         ),
       ),
+    );
+  }
+}
+
+/// No se pudo llegar al sitio oficial. Distinto de "ese dia no hubo sorteo".
+class _FalloDeCarga extends StatelessWidget {
+  const _FalloDeCarga({required this.onReintentar});
+
+  final VoidCallback onReintentar;
+
+  @override
+  Widget build(BuildContext context) {
+    return ListView(
+      padding: const EdgeInsets.all(AppSpacing.lg),
+      children: [
+        const SizedBox(height: AppSpacing.xl),
+        const Icon(Icons.cloud_off, size: 48, color: AppColors.error),
+        const SizedBox(height: AppSpacing.sm),
+        Text(
+          'No pudimos traer los resultados',
+          textAlign: TextAlign.center,
+          style: AppText.bodyLg.copyWith(color: AppColors.onSurface),
+        ),
+        const SizedBox(height: AppSpacing.base),
+        Text(
+          'Revisa la conexion y volve a probar.',
+          textAlign: TextAlign.center,
+          style: AppText.bodySm.copyWith(color: AppColors.onSurfaceVariant),
+        ),
+        const SizedBox(height: AppSpacing.xs),
+        TextButton.icon(
+          onPressed: onReintentar,
+          icon: const Icon(Icons.refresh, size: 18),
+          label: const Text('Reintentar'),
+          style: TextButton.styleFrom(foregroundColor: AppColors.secondary),
+        ),
+      ],
     );
   }
 }

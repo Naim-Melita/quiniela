@@ -8,7 +8,9 @@ import '../theme/acentos.dart';
 import '../theme/app_colors.dart';
 import '../theme/app_theme.dart';
 import '../widgets/app_scaffold.dart';
+import '../widgets/banner_anuncio.dart';
 import '../widgets/bolilla_numero.dart';
+import '../widgets/esqueleto.dart';
 import '../widgets/ticker_ultimo_minuto.dart';
 import 'buscar_numero_screen.dart';
 import 'detalle_sorteo_screen.dart';
@@ -126,9 +128,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
         future: _datos,
         builder: (context, snapshot) {
           if (snapshot.connectionState != ConnectionState.done) {
-            return const Center(
-              child: CircularProgressIndicator(color: AppColors.secondary),
-            );
+            return const _EsqueletoDashboard();
           }
           if (snapshot.hasError) {
             return _ErrorCarga(onReintentar: _refrescar);
@@ -150,7 +150,14 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 TickerUltimoMinuto(mensaje: datos.aviso),
                 const SizedBox(height: AppSpacing.md),
                 _BotonGenerar(onPressed: widget.onGenerarJugada),
+                // Debajo del boton: es la unica posicion del inicio que se ve
+                // sin scrollear. Se deja la separacion grande y el rotulo
+                // "PUBLICIDAD" arriba -- unos 49px entre el boton y el anuncio
+                // -- porque este es el boton que mas se toca de la app y un
+                // anuncio pegado ahi es de donde salen los clics por accidente.
                 const SizedBox(height: AppSpacing.lg),
+                const BannerAnuncio(),
+                const SizedBox(height: AppSpacing.md),
                 TituloSeccion(
                   'Ultimos Resultados',
                   accion: Row(
@@ -162,13 +169,17 @@ class _DashboardScreenState extends State<DashboardScreen> {
                         color: AppColors.secondary,
                         tooltip: 'Elegir loterias',
                       ),
-                      TextButton(
-                        onPressed: widget.onVerResultados,
-                        child: Text(
-                          'Ver todos',
-                          style: AppText.bodySm.copyWith(
-                            color: AppColors.secondary,
-                            fontWeight: FontWeight.bold,
+                      Flexible(
+                        child: TextButton(
+                          onPressed: widget.onVerResultados,
+                          child: Text(
+                            'Ver todos',
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: AppText.bodySm.copyWith(
+                              color: AppColors.secondary,
+                              fontWeight: FontWeight.bold,
+                            ),
                           ),
                         ),
                       ),
@@ -268,65 +279,61 @@ class _TarjetaResultado extends StatelessWidget {
     final acento = acentoDe(resultado.loteria);
     final fecha = DateFormat('d MMM', 'es').format(resultado.fecha);
 
-    return InkWell(
+    return TarjetaSuperficie(
       onTap: onTap,
-      borderRadius: AppRadius.allXl,
-      child: TarjetaSuperficie(
-        child: Column(
-          children: [
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        resultado.loteria.nombre,
-                        style: AppText.headlineMd.copyWith(
-                          color: AppColors.onSurface,
-                        ),
+      semantica: '${resultado.loteria.nombre}, ${resultado.turno.nombre} '
+          'del $fecha. A la cabeza: ${resultado.cabeza}. '
+          'Abre las 20 posiciones.',
+      child: Column(
+        children: [
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      resultado.loteria.nombre,
+                      style: AppText.headlineMd.copyWith(
+                        color: AppColors.onSurface,
                       ),
-                      Text(
-                        '${resultado.turno.nombre} - $fecha, '
-                        '${resultado.turno.horarioFormateado}',
-                        style: AppText.bodySm.copyWith(
-                          color: AppColors.onSurfaceVariant,
-                        ),
+                    ),
+                    Text(
+                      '${resultado.turno.nombre} - $fecha, '
+                      '${resultado.turno.horarioFormateado}',
+                      style: AppText.bodySm.copyWith(
+                        color: AppColors.onSurfaceVariant,
                       ),
-                    ],
-                  ),
+                    ),
+                  ],
                 ),
-                Icon(resultado.loteria.icono, color: acento),
-              ],
+              ),
+              Icon(resultado.loteria.icono, color: acento),
+              // La tarjeta entera abre el detalle; el chevron es el unico
+              // cartel que hace falta. Antes convivia con un "Ver las 20" que
+              // ademas desbordaba la fila en pantallas de 320px.
+              const Icon(
+                Icons.chevron_right,
+                color: AppColors.outline,
+              ),
+            ],
+          ),
+          const SizedBox(height: AppSpacing.md),
+          BolillaNumero(
+            numero: resultado.cabezaDosCifras,
+            color: acento,
+            semantica: 'A la cabeza: ${resultado.cabezaDosCifras}',
+          ),
+          const SizedBox(height: AppSpacing.sm),
+          Text(
+            resultado.cabeza,
+            style: AppText.dataDisplay.copyWith(
+              color: AppColors.onSurfaceVariant,
+              fontSize: 14,
             ),
-            const SizedBox(height: AppSpacing.md),
-            BolillaNumero(numero: resultado.cabezaDosCifras, color: acento),
-            const SizedBox(height: AppSpacing.sm),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Text(
-                  'Cabeza: ${resultado.cabeza}',
-                  style: AppText.dataDisplay.copyWith(
-                    color: AppColors.onSurfaceVariant,
-                    fontSize: 14,
-                  ),
-                ),
-                const SizedBox(width: AppSpacing.base),
-                Text(
-                  'Ver las 20',
-                  style: AppText.bodySm.copyWith(color: AppColors.secondary),
-                ),
-                const Icon(
-                  Icons.chevron_right,
-                  size: 16,
-                  color: AppColors.secondary,
-                ),
-              ],
-            ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
@@ -365,8 +372,19 @@ class _FilaSorteo extends StatelessWidget {
     final enVivo = sorteo.estado == EstadoSorteo.enVivo;
     final finalizado = sorteo.estado == EstadoSorteo.finalizado;
 
-    return Opacity(
-      opacity: finalizado ? 0.6 : 1,
+    // Un turno que ya paso se apaga con color, no con Opacity: el 0.6 que habia
+    // antes dejaba el texto secundario en 4.28:1 sobre el fondo, por debajo del
+    // 4.5:1 que pide AA. El outline es un token del sistema y da 5.1:1.
+    final colorTitulo = switch (sorteo.estado) {
+      EstadoSorteo.enVivo => AppColors.secondary,
+      EstadoSorteo.finalizado => AppColors.onSurfaceVariant,
+      EstadoSorteo.proximo => AppColors.onSurface,
+    };
+
+    return Semantics(
+      label: '${sorteo.turno.nombre}, '
+          '${sorteo.turno.horarioFormateado}, ${sorteo.etiquetaEstado}',
+      excludeSemantics: true,
       child: Container(
         decoration: BoxDecoration(
           color: enVivo ? AppColors.surfaceContainerHigh : null,
@@ -393,9 +411,7 @@ class _FilaSorteo extends StatelessWidget {
                     sorteo.turno.nombre,
                     style: AppText.bodyLg.copyWith(
                       fontWeight: FontWeight.bold,
-                      color: enVivo
-                          ? AppColors.secondary
-                          : AppColors.onSurface,
+                      color: colorTitulo,
                     ),
                   ),
                   Text(
@@ -407,13 +423,36 @@ class _FilaSorteo extends StatelessWidget {
                 ],
               ),
             ),
+            const SizedBox(width: AppSpacing.xs),
+            // Flexible: con el texto del sistema al 200%, "Finalizado" mide mas
+            // que la fila entera. El icono y la etiqueta de accesibilidad
+            // siguen diciendo el estado aunque el texto se recorte.
             if (enVivo)
-              const _IndicadorEnVivo()
+              const Flexible(child: _IndicadorEnVivo())
             else
-              Text(
-                sorteo.etiquetaEstado,
-                style: AppText.bodySm.copyWith(
-                  color: AppColors.onSurfaceVariant,
+              Flexible(
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    // Icono ademas del texto: el estado no puede depender solo
+                    // del color para quien no lo distingue.
+                    Icon(
+                      finalizado ? Icons.check_circle_outline : Icons.schedule,
+                      size: 14,
+                      color: AppColors.onSurfaceVariant,
+                    ),
+                    const SizedBox(width: AppSpacing.base),
+                    Flexible(
+                      child: Text(
+                        sorteo.etiquetaEstado,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: AppText.bodySm.copyWith(
+                          color: AppColors.onSurfaceVariant,
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
               ),
           ],
@@ -460,14 +499,106 @@ class _IndicadorEnVivoState extends State<_IndicadorEnVivo>
           ),
         ),
         const SizedBox(width: AppSpacing.base),
-        Text(
-          'En vivo',
-          style: AppText.bodySm.copyWith(
-            color: AppColors.secondary,
-            fontWeight: FontWeight.bold,
+        Flexible(
+          child: Text(
+            'En vivo',
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: AppText.bodySm.copyWith(
+              color: AppColors.secondary,
+              fontWeight: FontWeight.bold,
+            ),
           ),
         ),
       ],
+    );
+  }
+}
+
+/// Silueta del inicio mientras cargan los datos.
+///
+/// Reproduce la estructura real (franja, boton, dos tarjetas, agenda) para que
+/// la pagina no salte cuando entran los resultados.
+class _EsqueletoDashboard extends StatelessWidget {
+  const _EsqueletoDashboard();
+
+  @override
+  Widget build(BuildContext context) {
+    return EsqueletoDeLista(
+      etiqueta: 'Cargando los ultimos resultados',
+      child: ListView(
+        padding: const EdgeInsets.fromLTRB(
+          AppSpacing.containerMargin,
+          AppSpacing.md,
+          AppSpacing.containerMargin,
+          120,
+        ),
+        children: [
+          const Esqueleto(alto: 56, radio: AppRadius.allLg),
+          const SizedBox(height: AppSpacing.md),
+          const Esqueleto(alto: 56, radio: AppRadius.allXl),
+          const SizedBox(height: AppSpacing.lg),
+          const Esqueleto(alto: 24, ancho: 200),
+          const SizedBox(height: AppSpacing.md),
+          for (var i = 0; i < 2; i++) ...[
+            TarjetaSuperficie(
+              child: Column(
+                children: [
+                  Row(
+                    children: [
+                      const Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Esqueleto(alto: 20, ancho: 120),
+                            SizedBox(height: AppSpacing.base),
+                            Esqueleto(alto: 14, ancho: 180),
+                          ],
+                        ),
+                      ),
+                      const Esqueleto(alto: 24, ancho: 24, radio: AppRadius.full),
+                    ],
+                  ),
+                  const SizedBox(height: AppSpacing.md),
+                  const Esqueleto(alto: 96, ancho: 96, radio: AppRadius.full),
+                  const SizedBox(height: AppSpacing.sm),
+                  const Esqueleto(alto: 14, ancho: 64),
+                ],
+              ),
+            ),
+            const SizedBox(height: AppSpacing.md),
+          ],
+          const SizedBox(height: AppSpacing.xs),
+          const Esqueleto(alto: 24, ancho: 160),
+          const SizedBox(height: AppSpacing.md),
+          TarjetaSuperficie(
+            padding: EdgeInsets.zero,
+            child: Column(
+              children: [
+                for (var i = 0; i < TurnoSorteo.values.length; i++)
+                  const Padding(
+                    padding: EdgeInsets.all(AppSpacing.sm),
+                    child: Row(
+                      children: [
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Esqueleto(alto: 16, ancho: 96),
+                              SizedBox(height: AppSpacing.base),
+                              Esqueleto(alto: 14, ancho: 48),
+                            ],
+                          ),
+                        ),
+                        Esqueleto(alto: 14, ancho: 72),
+                      ],
+                    ),
+                  ),
+              ],
+            ),
+          ),
+        ],
+      ),
     );
   }
 }

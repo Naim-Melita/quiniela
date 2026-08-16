@@ -4,12 +4,14 @@ import 'package:flutter/services.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:intl/date_symbol_data_local.dart';
 
+import 'data/anuncios.dart';
 import 'data/api/loteria_ciudad_api.dart';
 import 'data/loteria_ciudad_repository.dart';
 import 'data/preferencias.dart';
 import 'screens/home_shell.dart';
 import 'theme/app_colors.dart';
 import 'theme/app_theme.dart';
+import 'widgets/banner_anuncio.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -20,6 +22,11 @@ Future<void> main() async {
   final preferencias = PreferenciasLoterias();
   await preferencias.cargar();
 
+  // Cuenta esta apertura y arranca el SDK. No se hace con await bloqueante mas
+  // alla de esto: si AdMob tarda, la app tiene que abrir igual.
+  final anuncios = Anuncios();
+  await anuncios.iniciar();
+
   SystemChrome.setSystemUIOverlayStyle(
     const SystemUiOverlayStyle(
       statusBarColor: Colors.transparent,
@@ -28,7 +35,7 @@ Future<void> main() async {
       systemNavigationBarIconBrightness: Brightness.light,
     ),
   );
-  runApp(QuinielaApp(preferencias: preferencias));
+  runApp(QuinielaApp(preferencias: preferencias, anuncios: anuncios));
 }
 
 /// A donde le pega la app.
@@ -41,21 +48,53 @@ String get _baseApi => kIsWeb && kDebugMode
     ? 'http://localhost:8090'
     : LoteriaCiudadApi.baseOficial;
 
-class QuinielaApp extends StatelessWidget {
-  const QuinielaApp({super.key, required this.preferencias});
+class QuinielaApp extends StatefulWidget {
+  const QuinielaApp({
+    super.key,
+    required this.preferencias,
+    required this.anuncios,
+  });
 
   final PreferenciasLoterias preferencias;
+  final Anuncios anuncios;
+
+  @override
+  State<QuinielaApp> createState() => _QuinielaAppState();
+}
+
+class _QuinielaAppState extends State<QuinielaApp> {
+  // Punto unico de inyeccion. Con MockQuinielaRepository() la app corre
+  // entera contra datos simulados, sin red, que es lo que usan los tests.
+  //
+  // Se arma aca y no en build(): cada build seria otro http.Client abierto,
+  // otro cache en memoria vacio y volver a bajar el indice de sorteos.
+  late final LoteriaCiudadApi _api = LoteriaCiudadApi(base: _baseApi);
+  late final LoteriaCiudadRepository _repositorio =
+      LoteriaCiudadRepository(api: _api);
+
+  @override
+  void initState() {
+    super.initState();
+    // Despues del primer frame: mostrarlo antes taparia una pantalla que
+    // todavia se esta armando, que es de las cosas que AdMob no permite.
+    WidgetsBinding.instance.addPostFrameCallback(
+      (_) => widget.anuncios.mostrarApertura(),
+    );
+  }
+
+  @override
+  void dispose() {
+    _api.cerrar();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
-    // Punto unico de inyeccion. Con MockQuinielaRepository() la app corre
-    // entera contra datos simulados, sin red, que es lo que usan los tests.
-    final repositorio = LoteriaCiudadRepository(
-      api: LoteriaCiudadApi(base: _baseApi),
-    );
-
     return MaterialApp(
-      title: 'Quiniela',
+      // Lo que se ve en el conmutador de apps de Android. Va la marca sola: el
+      // titulo largo ("Quiniela24: Resultados de Hoy") es el de la ficha de
+      // Play, y ahi lo configura la consola, no el codigo.
+      title: 'Quiniela24',
       debugShowCheckedModeBanner: false,
       theme: AppTheme.dark,
       locale: const Locale('es'),
@@ -65,9 +104,12 @@ class QuinielaApp extends StatelessWidget {
         GlobalWidgetsLocalizations.delegate,
         GlobalCupertinoLocalizations.delegate,
       ],
-      home: HomeShell(
-        repositorio: repositorio,
-        preferencias: preferencias,
+      home: PublicidadDeLaApp(
+        anuncios: widget.anuncios,
+        child: HomeShell(
+          repositorio: _repositorio,
+          preferencias: widget.preferencias,
+        ),
       ),
     );
   }

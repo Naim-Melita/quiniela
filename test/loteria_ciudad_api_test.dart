@@ -19,6 +19,7 @@ void main() {
         _fixture('ciudad_matutina.xml'),
         loteria: Loteria.nacional,
         fechaEsperada: DateTime(2026, 8, 12),
+        turnoEsperado: TurnoSorteo.matutina,
       );
     });
 
@@ -43,12 +44,31 @@ void main() {
       expect(resultado.sorteo, '52764');
     });
 
+    test('si no puede reconocer el turno se queda con el que se pidio', () {
+      // El archivo se direcciona por turno, asi que el que se pidio es mejor
+      // dato que cualquier default: devolver otro haria que el repositorio
+      // guarde en cache con una clave distinta de la que consulta.
+      final sinModalidad = _fixture('ciudad_matutina.xml')
+          .replaceAll(RegExp(r'<Modalidad>.*?</Modalidad>'), '')
+          .replaceAll(RegExp(r'<HoraSorteo>.*?</HoraSorteo>'), '');
+
+      final resultado = LoteriaCiudadApi.parsearExtractoXml(
+        sinModalidad,
+        loteria: Loteria.nacional,
+        fechaEsperada: DateTime(2026, 8, 12),
+        turnoEsperado: TurnoSorteo.nocturna,
+      );
+
+      expect(resultado.turno, TurnoSorteo.nocturna);
+    });
+
     test('un XML sin el nodo Suerte falla explicitamente', () {
       expect(
         () => LoteriaCiudadApi.parsearExtractoXml(
           '<DatosSorteo><Entidad>x</Entidad></DatosSorteo>',
           loteria: Loteria.nacional,
           fechaEsperada: DateTime(2026, 8, 12),
+          turnoEsperado: TurnoSorteo.matutina,
         ),
         throwsA(isA<QuinielaApiException>()),
       );
@@ -62,6 +82,7 @@ void main() {
           truncado,
           loteria: Loteria.nacional,
           fechaEsperada: DateTime(2026, 8, 12),
+          turnoEsperado: TurnoSorteo.matutina,
         ),
         throwsA(isA<QuinielaApiException>()),
       );
@@ -73,6 +94,7 @@ void main() {
           '<html><body>404</body>',
           loteria: Loteria.nacional,
           fechaEsperada: DateTime(2026, 8, 12),
+          turnoEsperado: TurnoSorteo.matutina,
         ),
         throwsA(isA<QuinielaApiException>()),
       );

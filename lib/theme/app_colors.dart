@@ -66,6 +66,13 @@ abstract final class AppSpacing {
 
   /// Separacion entre columnas/tarjetas.
   static const double gutter = 12;
+
+  /// Lado minimo de cualquier cosa que se toque.
+  ///
+  /// 48dp es el minimo de Material y de WCAG 2.5.5. No se mide sobre el texto
+  /// sino sobre el area sensible: un chip de 20px de texto necesita llegar a 48
+  /// aunque se vea mas chico.
+  static const double blancoDeToque = 48;
 }
 
 /// Radios del design system.

@@ -52,3 +52,35 @@ app.*.map.json
 
 # Configuracion local de Claude Code
 .claude/
+
+# --- Nada de esto entra al repositorio, nunca --------------------------------
+#
+# Duplica lo que ya hay en android/.gitignore a proposito: si manana alguien
+# toca ese archivo o el keystore aparece en otra carpeta, esta red lo agarra
+# igual. Una clave de firma publicada no se puede "despublicar": hay que
+# rotarla, y con Play eso significa tramite con Google.
+
+# Claves de firma, en cualquier carpeta y en cualquiera de sus formatos.
+*.jks
+*.keystore
+*.p12
+*.pfx
+*.pem
+*.p8
+*.key
+
+# Credenciales de firma de Android. El .example si se versiona: es la plantilla
+# sin datos, y el patron de arriba no lo alcanza porque el nombre es exacto.
+key.properties
+**/key.properties
+
+# Variables de entorno.
+.env
+.env.*
+!.env.example
+
+# Cuentas de servicio de Google (Play Publishing API, Firebase).
+google-services.json
+GoogleService-Info.plist
+service-account*.json
+*-service-account.json

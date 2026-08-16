@@ -125,10 +125,6 @@ class ResultadoSorteo {
   /// Numero de sorteo oficial, cuando la fuente lo informa.
   final String? sorteo;
 
-  /// Clave estable para cachear: un sorteo ya publicado no cambia nunca.
-  String get clave =>
-      '${loteria.name}|${fecha.toIso8601String().substring(0, 10)}|${turno.name}';
-
   Map<String, Object?> aJson() => {
         'loteria': loteria.name,
         'turno': turno.name,
@@ -236,11 +232,13 @@ class FrecuenciaNumero {
 
   /// Numero de 2 digitos.
   final String numero;
-  final int apariciones;
-  final int sorteosAnalizados;
 
-  double get porcentaje =>
-      sorteosAnalizados == 0 ? 0 : apariciones / sorteosAnalizados * 100;
+  /// Veces que salio, contando las 20 posiciones de cada sorteo. Puede ser
+  /// mayor que [sorteosAnalizados]: un numero sale varias veces en la misma
+  /// pizarra, asi que esto no es un "en cuantos sorteos aparecio".
+  final int apariciones;
+
+  final int sorteosAnalizados;
 }
 
 /// Una jugada generada por el usuario.

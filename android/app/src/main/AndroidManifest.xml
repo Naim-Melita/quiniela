@@ -2,7 +2,7 @@
     <!-- Los resultados se piden al sitio oficial de Loteria de la Ciudad. -->
     <uses-permission android:name="android.permission.INTERNET"/>
     <application
-        android:label="quiniela"
+        android:label="Quiniela24"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">
         <activity
@@ -27,6 +27,15 @@
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
         </activity>
+        <!-- App ID de AdMob. Es obligatorio: si falta o esta mal, el SDK tira
+             una excepcion al iniciar y la app no abre.
+
+             Es distinto de los IDs de bloque de anuncio: este lleva "~" y los
+             bloques llevan "/". Los bloques estan en lib/data/anuncios.dart. -->
+        <meta-data
+            android:name="com.google.android.gms.ads.APPLICATION_ID"
+            android:value="ca-app-pub-1932510392030959~5614503889" />
+
         <!-- Don't delete the meta-data below.
              This is used by the Flutter tool to generate GeneratedPluginRegistrant.java -->
         <meta-data

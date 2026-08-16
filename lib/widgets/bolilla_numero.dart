@@ -12,46 +12,62 @@ class BolillaNumero extends StatelessWidget {
     super.key,
     required this.numero,
     required this.color,
+    required this.semantica,
     this.diametro = 96,
     this.glow = true,
   });
 
   final String numero;
   final Color color;
+
+  /// Que significa el numero: "A la cabeza: 41". Suelto, "41" no dice nada.
+  final String semantica;
+
   final double diametro;
   final bool glow;
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      width: diametro,
-      height: diametro,
-      decoration: BoxDecoration(
-        shape: BoxShape.circle,
-        border: Border.all(color: color, width: 4),
-        boxShadow: glow
-            ? [
-                BoxShadow(
-                  color: color.withValues(alpha: 0.4),
-                  blurRadius: 15,
-                  spreadRadius: 1,
-                ),
-              ]
-            : null,
-      ),
-      alignment: Alignment.center,
-      child: Text(
-        numero,
-        style: AppText.data(diametro * 0.42, weight: FontWeight.w800).copyWith(
-          color: AppColors.onSurface,
-          shadows: glow
+    return Semantics(
+      label: semantica,
+      excludeSemantics: true,
+      child: Container(
+        width: diametro,
+        height: diametro,
+        decoration: BoxDecoration(
+          shape: BoxShape.circle,
+          border: Border.all(color: color, width: 4),
+          boxShadow: glow
               ? [
-                  Shadow(
-                    color: color.withValues(alpha: 0.5),
-                    blurRadius: 10,
+                  BoxShadow(
+                    color: color.withValues(alpha: 0.4),
+                    blurRadius: 15,
+                    spreadRadius: 1,
                   ),
                 ]
               : null,
+        ),
+        alignment: Alignment.center,
+        // El circulo tiene un diametro fijo, asi que el numero no puede crecer
+        // sin limite: a 2x se comia el borde. Se le pone techo al escalado solo
+        // adentro de la bolilla; el resto de la pantalla escala normal.
+        child: MediaQuery.withClampedTextScaling(
+          maxScaleFactor: 1.3,
+          child: Text(
+            numero,
+            style:
+                AppText.data(diametro * 0.42, weight: FontWeight.w800).copyWith(
+              color: AppColors.onSurface,
+              shadows: glow
+                  ? [
+                      Shadow(
+                        color: color.withValues(alpha: 0.5),
+                        blurRadius: 10,
+                      ),
+                    ]
+                  : null,
+            ),
+          ),
         ),
       ),
     );

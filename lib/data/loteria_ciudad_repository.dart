@@ -37,6 +37,9 @@ class LoteriaCiudadRepository implements QuinielaRepository {
   /// El indice de sorteos cambia solo cuando se publica un turno nuevo.
   static const _vigenciaIndice = Duration(minutes: 10);
 
+  /// Cuanto se espera antes de volver a pedir el indice despues de un fallo.
+  static const _esperaTrasFalloDeIndice = Duration(minutes: 1);
+
   final LoteriaCiudadApi _api;
   final CacheResultados _cache;
   final DateTime Function() _ahora;
@@ -45,6 +48,8 @@ class LoteriaCiudadRepository implements QuinielaRepository {
 
   List<EntradaIndice>? _indice;
   DateTime? _indiceActualizado;
+  DateTime? _indiceFallo;
+  Future<List<EntradaIndice>>? _indiceEnVuelo;
 
   /// Turnos que ya deberian estar publicados a esta altura del dia.
   @override
@@ -107,7 +112,7 @@ class LoteriaCiudadRepository implements QuinielaRepository {
     final turnos = turno == null ? TurnoSorteo.values : [turno];
     final pedidos = [
       for (final t in turnos)
-        if (!(dia == hoy && !_yaSePublico(t)))
+        if (dia != hoy || _yaSePublico(t))
           for (final l in loterias)
             // Montevideo solo juega matutina y nocturna: pedir los otros
             // turnos seria gastar peticiones en respuestas vacias.
@@ -262,6 +267,11 @@ class LoteriaCiudadRepository implements QuinielaRepository {
   /// loteria que ese dia no jugo) es normal, y no tiene que voltear al resto del
   /// lote. Los errores de parseo si se loguean, porque significan que el sitio
   /// cambio y hay que mirarlo.
+  ///
+  /// Los "no hay sorteo" de fechas pasadas se anotan en el cache. Un domingo o
+  /// una loteria que ese turno no juega responden lo mismo para siempre, y sin
+  /// anotarlo una ventana de 30 dias vuelve a preguntar por decenas de sorteos
+  /// inexistentes en cada carga.
   Future<List<ResultadoSorteo>> _traerLote(
     List<(Loteria, DateTime, TurnoSorteo)> pedidos,
   ) async {
@@ -277,18 +287,35 @@ class LoteriaCiudadRepository implements QuinielaRepository {
       final enCache = _cache.obtener(clave);
       if (enCache != null) {
         resultados.add(enCache);
-      } else {
+      } else if (!_cache.sabeQueNoHay(clave)) {
         porRed.add(pedido);
       }
     }
 
     for (var i = 0; i < porRed.length; i += _concurrencia) {
-      final grupo = porRed.skip(i).take(_concurrencia);
+      final grupo = porRed.sublist(i, min(i + _concurrencia, porRed.length));
       final tanda = await Future.wait(grupo.map(_traerUno));
-      for (final r in tanda) {
-        if (r != null) {
-          _cache.guardar(r);
-          resultados.add(r);
+
+      // Future.wait respeta el orden, asi que cada respuesta se aparea con su
+      // pedido por indice.
+      for (var j = 0; j < tanda.length; j++) {
+        final pedido = grupo[j];
+        final (desenlace, resultado) = tanda[j];
+        switch (desenlace) {
+          case _Desenlace.encontrado:
+            // Se guarda con la clave del pedido, no con la del resultado: son
+            // la misma salvo que la fuente informe otro turno, y en ese caso lo
+            // que hay que poder volver a encontrar es lo que se pidio.
+            _cache.guardar(_clave(pedido), resultado!);
+            resultados.add(resultado);
+          case _Desenlace.sinSorteo:
+            // Lo de hoy no se anota: un turno ya sorteado se puede publicar mas
+            // tarde, y el negativo no tiene vencimiento.
+            if (_esPasada(pedido.$2)) _cache.marcarSinDatos(_clave(pedido));
+          case _Desenlace.fallo:
+            // Transitorio (sin red, sitio caido): no se anota nada, se
+            // reintenta en la proxima carga.
+            break;
         }
       }
     }
@@ -296,32 +323,48 @@ class LoteriaCiudadRepository implements QuinielaRepository {
     return resultados;
   }
 
-  Future<ResultadoSorteo?> _traerUno(
+  /// Trae un sorteo distinguiendo "la fuente dice que no existe" de "no se pudo
+  /// preguntar". Lo primero es un hecho inmutable que se puede cachear; lo
+  /// segundo es un problema de red que hay que reintentar.
+  Future<(_Desenlace, ResultadoSorteo?)> _traerUno(
     (Loteria, DateTime, TurnoSorteo) pedido,
   ) async {
     final (loteria, fecha, turno) = pedido;
     try {
       if (loteria.tieneExtractoXml) {
-        return await _api.extractoXml(
+        // null = 404 o extracto vacio: ese sorteo no existe.
+        final resultado = await _api.extractoXml(
           loteria: loteria,
           fecha: fecha,
           turno: turno,
         );
+        return _desenlaceDe(resultado);
       }
 
+      // Sin numero de sorteo en el indice no hay forma de pedirlo: o ese dia no
+      // se jugo, o la fecha quedo fuera de los ~26 dias que publica la home. En
+      // los dos casos esta fuente no lo tiene y no lo va a tener.
       final sorteo = await _sorteoDe(fecha: fecha, turno: turno);
-      if (sorteo == null) return null;
-      return await _api.resultadoHtml(
-        loteria: loteria,
-        fecha: fecha,
-        turno: turno,
-        sorteo: sorteo,
+      if (sorteo == null) return (_Desenlace.sinSorteo, null);
+
+      return _desenlaceDe(
+        await _api.resultadoHtml(
+          loteria: loteria,
+          fecha: fecha,
+          turno: turno,
+          sorteo: sorteo,
+        ),
       );
     } on QuinielaApiException catch (e) {
       debugPrint('${loteria.nombre} ${turno.nombre} ${_iso(fecha)}: $e');
-      return null;
+      return (_Desenlace.fallo, null);
     }
   }
+
+  (_Desenlace, ResultadoSorteo?) _desenlaceDe(ResultadoSorteo? resultado) =>
+      resultado == null
+          ? (_Desenlace.sinSorteo, null)
+          : (_Desenlace.encontrado, resultado);
 
   /// Numero de sorteo de una fecha y turno, segun el indice de la home.
   Future<String?> _sorteoDe({
@@ -344,10 +387,34 @@ class LoteriaCiudadRepository implements QuinielaRepository {
       return cacheado;
     }
 
-    final fresco = await _api.indiceSorteos();
-    _indice = fresco;
-    _indiceActualizado = _ahora();
-    return fresco;
+    // Un fallo reciente no se reintenta pedido por pedido: con una ventana de
+    // 30 dias serian ~150 descargas de la home para el mismo error.
+    final fallo = _indiceFallo;
+    if (fallo != null &&
+        _ahora().difference(fallo) < _esperaTrasFalloDeIndice) {
+      throw const QuinielaApiException(
+        'El indice de sorteos no esta disponible',
+      );
+    }
+
+    // Los pedidos concurrentes comparten la misma descarga: son seis los que
+    // arrancan juntos, y sin esto bajan la home seis veces.
+    return _indiceEnVuelo ??= _descargarIndice();
+  }
+
+  Future<List<EntradaIndice>> _descargarIndice() async {
+    try {
+      final fresco = await _api.indiceSorteos();
+      _indice = fresco;
+      _indiceActualizado = _ahora();
+      _indiceFallo = null;
+      return fresco;
+    } catch (_) {
+      _indiceFallo = _ahora();
+      rethrow;
+    } finally {
+      _indiceEnVuelo = null;
+    }
   }
 
   /// Turnos desde [desde] hacia el pasado, del mas reciente al mas viejo.
@@ -379,6 +446,11 @@ class LoteriaCiudadRepository implements QuinielaRepository {
     return (ahora.hour * 60 + ahora.minute) - turno.minutosDelDia >= 15;
   }
 
+  /// Si [fecha] es anterior a hoy, y por lo tanto lo que diga la fuente sobre
+  /// ella ya no va a cambiar.
+  bool _esPasada(DateTime fecha) =>
+      _soloFecha(fecha).isBefore(_soloFecha(_ahora()));
+
   String _clave((Loteria, DateTime, TurnoSorteo) pedido) {
     final (loteria, fecha, turno) = pedido;
     return '${loteria.name}|${_iso(fecha)}|${turno.name}';
@@ -387,4 +459,16 @@ class LoteriaCiudadRepository implements QuinielaRepository {
   String _iso(DateTime d) => _soloFecha(d).toIso8601String().substring(0, 10);
 
   DateTime _soloFecha(DateTime d) => DateTime(d.year, d.month, d.day);
+}
+
+/// Como termino un pedido individual contra la fuente.
+enum _Desenlace {
+  /// Vino el sorteo.
+  encontrado,
+
+  /// La fuente contesto que ese sorteo no existe. Es un dato en si mismo.
+  sinSorteo,
+
+  /// No se pudo preguntar (sin red, sitio caido, marcado cambiado).
+  fallo,
 }
