@@ -65,6 +65,13 @@ android {
             } else {
                 null
             }
+
+            // WorkManager usa Room y resuelve sus implementaciones generadas
+            // por nombre. Estas reglas evitan que R8 las renombre en release.
+            proguardFiles(
+                getDefaultProguardFile("proguard-android-optimize.txt"),
+                "proguard-rules.pro",
+            )
         }
     }
 }

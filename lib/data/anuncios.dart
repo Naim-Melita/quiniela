@@ -66,6 +66,7 @@ class Anuncios {
   int _aperturas = 0;
   DateTime? _ultimaApertura;
   File? _archivo;
+  Future<void>? _inicializacion;
 
   /// Si se pueden pedir anuncios. Falso en web (el SDK no existe ahi) y en los
   /// tests, donde no hay canal de plataforma.
@@ -74,17 +75,21 @@ class Anuncios {
   /// Arranca el SDK y cuenta esta apertura.
   ///
   /// Nunca tira: que falle la publicidad no puede impedir que abra la app.
-  Future<void> iniciar() async {
+  Future<void> iniciar() => _inicializacion ??= _iniciar();
+
+  Future<void> _iniciar() async {
     if (kIsWeb) return;
     try {
       await _leerUso();
       _aperturas++;
       await _guardarUso();
 
-      await MobileAds.instance.updateRequestConfiguration(
-        RequestConfiguration(testDeviceIds: dispositivosDePrueba),
-      );
-      await MobileAds.instance.initialize();
+      await (() async {
+        await MobileAds.instance.updateRequestConfiguration(
+          RequestConfiguration(testDeviceIds: dispositivosDePrueba),
+        );
+        await MobileAds.instance.initialize();
+      })().timeout(const Duration(seconds: 20));
       _iniciado = true;
     } catch (e) {
       debugPrint('No se pudo iniciar la publicidad: $e');
@@ -133,6 +138,10 @@ class Anuncios {
   /// Se llama despues del primer frame: mostrarlo antes taparia la pantalla
   /// mientras todavia se esta armando, que es justo lo que AdMob no permite.
   Future<void> mostrarApertura() async {
+    // El primer frame puede llegar antes que AdMob. Se espera aca, fuera del
+    // arranque visual, y se comparte el mismo Future para no inicializar dos
+    // veces ni contar dos aperturas.
+    await iniciar();
     if (!toca) return;
 
     await AppOpenAd.load(

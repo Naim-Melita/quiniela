@@ -51,17 +51,22 @@ class LoteriaCiudadApi {
   LoteriaCiudadApi({
     http.Client? cliente,
     String? base,
+    String? baseAlternativa,
     this.timeout = const Duration(seconds: 15),
-  })  : _cliente = cliente ?? http.Client(),
-        _base = base ?? baseOficial;
+  }) : _cliente = cliente ?? http.Client(),
+       _base = base ?? baseProxy,
+       _baseAlternativa =
+           baseAlternativa ?? (base == null ? baseOficial : null);
 
   static const baseOficial = 'https://quiniela.loteriadelaciudad.gob.ar';
+  static const baseProxy = 'https://quiniela24.armelix.dev/fuente-loteria';
 
   /// Codigo de juego de la quiniela en `consultaResultados.php`.
   static const _codigoJuego = '0080';
 
   final http.Client _cliente;
   final String _base;
+  final String? _baseAlternativa;
   final Duration timeout;
 
   void cerrar() => _cliente.close();
@@ -111,7 +116,11 @@ class LoteriaCiudadApi {
     final entradas = <EntradaIndice>[];
     for (final entrada in porFecha.entries) {
       final sorteos = entrada.value..sort();
-      for (var i = 0; i < sorteos.length && i < TurnoSorteo.values.length; i++) {
+      for (
+        var i = 0;
+        i < sorteos.length && i < TurnoSorteo.values.length;
+        i++
+      ) {
         entradas.add(
           EntradaIndice(
             sorteo: '${sorteos[i]}',
@@ -198,12 +207,17 @@ class LoteriaCiudadApi {
       // direcciona por turno, y devolver otro haria que el repositorio guarde en
       // cache con una clave distinta de la que consulta (nunca acertaria) y que
       // la pizarra quede rotulada con un turno que no es.
-      turno: _turnoDesdeModalidad(modalidad) ??
+      turno:
+          _turnoDesdeModalidad(modalidad) ??
           _turnoDesdeHora(
             doc.findAllElements('HoraSorteo').firstOrNull?.innerText.trim(),
           ) ??
           turnoEsperado,
-      fecha: DateTime(fechaEsperada.year, fechaEsperada.month, fechaEsperada.day),
+      fecha: DateTime(
+        fechaEsperada.year,
+        fechaEsperada.month,
+        fechaEsperada.day,
+      ),
       numeros: numeros,
       letras: doc.findAllElements('Letras').firstOrNull?.innerText.trim(),
       sorteo: doc.findAllElements('Sorteo').firstOrNull?.innerText.trim(),
@@ -302,34 +316,57 @@ class LoteriaCiudadApi {
   }
 
   Future<String?> _get(Uri uri, {bool aceptar404 = false}) async {
-    final http.Response respuesta;
-    try {
-      respuesta = await _cliente.get(uri).timeout(timeout);
-    } catch (e) {
-      throw QuinielaApiException('No se pudo conectar con $uri', causa: e);
+    Object? ultimoError;
+    var hubo404 = false;
+    for (final candidata in _candidatas(uri)) {
+      try {
+        final respuesta = await _cliente.get(candidata).timeout(timeout);
+        if (respuesta.statusCode == 200) return _decodificar(respuesta);
+        if (respuesta.statusCode == 404) hubo404 = true;
+        ultimoError = QuinielaApiException(
+          '$candidata respondio ${respuesta.statusCode}',
+        );
+      } catch (e) {
+        ultimoError = e;
+      }
     }
 
-    if (aceptar404 && respuesta.statusCode == 404) return null;
-    if (respuesta.statusCode != 200) {
-      throw QuinielaApiException(
-        '$uri respondio ${respuesta.statusCode}',
-      );
-    }
-    return _decodificar(respuesta);
+    if (aceptar404 && hubo404) return null;
+    throw QuinielaApiException(
+      'No se pudo conectar con $uri',
+      causa: ultimoError,
+    );
   }
 
   Future<String> _post(Uri uri, Map<String, String> campos) async {
-    final http.Response respuesta;
-    try {
-      respuesta = await _cliente.post(uri, body: campos).timeout(timeout);
-    } catch (e) {
-      throw QuinielaApiException('No se pudo conectar con $uri', causa: e);
+    Object? ultimoError;
+    for (final candidata in _candidatas(uri)) {
+      try {
+        final respuesta = await _cliente
+            .post(candidata, body: campos)
+            .timeout(timeout);
+        if (respuesta.statusCode == 200) return _decodificar(respuesta);
+        ultimoError = QuinielaApiException(
+          '$candidata respondio ${respuesta.statusCode}',
+        );
+      } catch (e) {
+        ultimoError = e;
+      }
     }
 
-    if (respuesta.statusCode != 200) {
-      throw QuinielaApiException('$uri respondio ${respuesta.statusCode}');
-    }
-    return _decodificar(respuesta);
+    throw QuinielaApiException(
+      'No se pudo conectar con $uri',
+      causa: ultimoError,
+    );
+  }
+
+  Iterable<Uri> _candidatas(Uri original) sync* {
+    yield original;
+    final alternativa = _baseAlternativa;
+    if (alternativa == null || !original.toString().startsWith(_base)) return;
+    yield Uri.parse(
+      '$alternativa${original.toString().substring(_base.length)}',
+    );
   }
 
   /// El sitio no declara charset en todas las respuestas y http.dart cae a

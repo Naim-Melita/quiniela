@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -25,7 +27,6 @@ Future<void> main() async {
   // Cuenta esta apertura y arranca el SDK. No se hace con await bloqueante mas
   // alla de esto: si AdMob tarda, la app tiene que abrir igual.
   final anuncios = Anuncios();
-  await anuncios.iniciar();
 
   SystemChrome.setSystemUIOverlayStyle(
     const SystemUiOverlayStyle(
@@ -35,7 +36,24 @@ Future<void> main() async {
       systemNavigationBarIconBrightness: Brightness.light,
     ),
   );
-  runApp(QuinielaApp(preferencias: preferencias, anuncios: anuncios));
+  mostrarAplicacionAntesDeIniciarPublicidad(
+    mostrarAplicacion: () =>
+        runApp(QuinielaApp(preferencias: preferencias, anuncios: anuncios)),
+    iniciarPublicidad: anuncios.iniciar,
+  );
+}
+
+/// Dibuja la primera pantalla antes de iniciar cualquier SDK publicitario.
+///
+/// AdMob es accesorio: una inicializacion lenta nunca puede dejar a Android en
+/// el splash nativo. La funcion separada mantiene esa garantia bajo prueba.
+@visibleForTesting
+void mostrarAplicacionAntesDeIniciarPublicidad({
+  required VoidCallback mostrarAplicacion,
+  required Future<void> Function() iniciarPublicidad,
+}) {
+  mostrarAplicacion();
+  unawaited(iniciarPublicidad());
 }
 
 /// A donde le pega la app.
@@ -44,10 +62,6 @@ Future<void> main() async {
 /// llamada por CORS (el sitio no manda las cabeceras), asi que en debug se pasa
 /// por el proxy local de `tool/proxy_cors.dart`, que existe solo para poder
 /// mirar la app real en el navegador sin emulador.
-String get _baseApi => kIsWeb && kDebugMode
-    ? 'http://localhost:8090'
-    : LoteriaCiudadApi.baseOficial;
-
 class QuinielaApp extends StatefulWidget {
   const QuinielaApp({
     super.key,
@@ -68,9 +82,12 @@ class _QuinielaAppState extends State<QuinielaApp> {
   //
   // Se arma aca y no en build(): cada build seria otro http.Client abierto,
   // otro cache en memoria vacio y volver a bajar el indice de sorteos.
-  late final LoteriaCiudadApi _api = LoteriaCiudadApi(base: _baseApi);
-  late final LoteriaCiudadRepository _repositorio =
-      LoteriaCiudadRepository(api: _api);
+  late final LoteriaCiudadApi _api = kIsWeb && kDebugMode
+      ? LoteriaCiudadApi(base: 'http://localhost:8090')
+      : LoteriaCiudadApi();
+  late final LoteriaCiudadRepository _repositorio = LoteriaCiudadRepository(
+    api: _api,
+  );
 
   @override
   void initState() {

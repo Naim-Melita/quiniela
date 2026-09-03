@@ -1,6 +1,9 @@
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:flutter_test/flutter_test.dart';
+import 'package:http/http.dart' as http;
+import 'package:http/testing.dart';
 import 'package:quiniela/data/api/loteria_ciudad_api.dart';
 import 'package:quiniela/models/sorteo.dart';
 
@@ -11,6 +14,35 @@ String _fixture(String nombre) =>
     File('test/fixtures/$nombre').readAsStringSync();
 
 void main() {
+  group('fuentes de red', () {
+    test(
+      'si el proxy falla reintenta la misma ruta contra la fuente oficial',
+      () async {
+        final hosts = <String>[];
+        final cliente = MockClient((pedido) async {
+          hosts.add(pedido.url.host);
+          if (pedido.url.host == 'proxy.test') {
+            return http.Response('proxy no disponible', 502);
+          }
+          return http.Response.bytes(
+            utf8.encode(_fixture('home_indice.html')),
+            200,
+          );
+        });
+        final api = LoteriaCiudadApi(
+          cliente: cliente,
+          base: 'https://proxy.test/fuente-loteria',
+          baseAlternativa: 'https://oficial.test',
+        );
+
+        final indice = await api.indiceSorteos();
+
+        expect(indice, isNotEmpty);
+        expect(hosts, ['proxy.test', 'oficial.test']);
+      },
+    );
+  });
+
   group('extracto XML de la Ciudad', () {
     late ResultadoSorteo resultado;
 
@@ -75,8 +107,9 @@ void main() {
     });
 
     test('un XML al que le falta una posicion falla explicitamente', () {
-      final truncado = _fixture('ciudad_matutina.xml')
-          .replaceAll(RegExp(r'<N20>\d+</N20>'), '');
+      final truncado = _fixture(
+        'ciudad_matutina.xml',
+      ).replaceAll(RegExp(r'<N20>\d+</N20>'), '');
       expect(
         () => LoteriaCiudadApi.parsearExtractoXml(
           truncado,
@@ -143,10 +176,9 @@ void main() {
 
     test('una grilla incompleta falla en vez de devolver datos a medias', () {
       // Se le saca la posicion 20 a las dos copias de la grilla.
-      final mutilado = _fixture('buenos_aires_fragmento.html').replaceAll(
-        RegExp(r'<div class="pos">20</div><div>\d+</div>'),
-        '',
-      );
+      final mutilado = _fixture(
+        'buenos_aires_fragmento.html',
+      ).replaceAll(RegExp(r'<div class="pos">20</div><div>\d+</div>'), '');
 
       expect(
         () => LoteriaCiudadApi.parsearFragmentoHtml(
@@ -186,16 +218,18 @@ void main() {
     });
 
     test('asigna los turnos en orden dentro de cada fecha', () {
-      final delDia = indice
-          .where((e) => e.fecha == DateTime(2026, 8, 10))
-          .toList()
-        ..sort((a, b) => a.turno.index.compareTo(b.turno.index));
+      final delDia =
+          indice.where((e) => e.fecha == DateTime(2026, 8, 10)).toList()
+            ..sort((a, b) => a.turno.index.compareTo(b.turno.index));
 
       // 52752..52756 son, segun la tabla de la propia home, PREVIA a NOCTURNA.
-      expect(
-        delDia.map((e) => e.sorteo),
-        ['52752', '52753', '52754', '52755', '52756'],
-      );
+      expect(delDia.map((e) => e.sorteo), [
+        '52752',
+        '52753',
+        '52754',
+        '52755',
+        '52756',
+      ]);
     });
 
     test('el sorteo 52764 cae en la matutina del 12/08, como dice su XML', () {

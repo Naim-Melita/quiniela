@@ -1,0 +1,149 @@
+/* Estilo compartido de las paginas legales de Quiniela24.
+ *
+ * Deliberadamente sin tipografias externas: estas paginas las abre un revisor de
+ * Google o un usuario que quiere saber que se hace con sus datos, y no tiene
+ * sentido que para leerlas haya que pedirle nada a un tercero. Se usa la
+ * tipografia del sistema.
+ *
+ * La paleta es la misma de la app (navy + verde), pero respeta el modo claro del
+ * navegador: un texto legal se lee, se imprime y se copia, y forzar fondo oscuro
+ * en un documento largo es peor para todo eso. */
+
+:root {
+  --fondo: #ffffff;
+  --superficie: #f4f6f9;
+  --texto: #12202f;
+  --texto-tenue: #4a5a6b;
+  --borde: #d9e0e8;
+  --acento: #00875a;
+  --ancho: 44rem;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --fondo: #051424;
+    --superficie: #122131;
+    --texto: #d4e4fa;
+    --texto-tenue: #9fb2c7;
+    --borde: #273647;
+    --acento: #4edea3;
+  }
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  padding: 2rem 1.25rem 4rem;
+  background: var(--fondo);
+  color: var(--texto);
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+    "Helvetica Neue", Arial, sans-serif;
+  font-size: 1.0625rem;
+  line-height: 1.7;
+  -webkit-text-size-adjust: 100%;
+}
+
+main { max-width: var(--ancho); margin: 0 auto; }
+
+header {
+  max-width: var(--ancho);
+  margin: 0 auto 2.5rem;
+  padding-bottom: 1.5rem;
+  border-bottom: 1px solid var(--borde);
+}
+
+.marca {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.625rem;
+  font-weight: 700;
+  font-size: 1.125rem;
+  letter-spacing: -0.01em;
+  color: var(--acento);
+  text-decoration: none;
+}
+
+.marca img {
+  width: 2.25rem;
+  height: 2.25rem;
+  border-radius: 0.5rem;
+}
+
+h1 {
+  font-size: 1.875rem;
+  line-height: 1.25;
+  letter-spacing: -0.02em;
+  margin: 1rem 0 0.5rem;
+}
+
+h2 {
+  font-size: 1.25rem;
+  line-height: 1.35;
+  margin: 2.5rem 0 0.75rem;
+  padding-top: 0.5rem;
+  border-top: 1px solid var(--borde);
+}
+
+h2:first-of-type { border-top: none; padding-top: 0; }
+
+p, li { color: var(--texto); }
+
+.fecha { color: var(--texto-tenue); font-size: 0.9375rem; margin: 0; }
+
+ul { padding-left: 1.25rem; }
+li { margin-bottom: 0.5rem; }
+
+a { color: var(--acento); }
+a:focus-visible, .marca:focus-visible {
+  outline: 2px solid var(--acento);
+  outline-offset: 3px;
+  border-radius: 2px;
+}
+
+/* Bloque para lo que el usuario tiene que leer si o si. */
+.destacado {
+  background: var(--superficie);
+  border: 1px solid var(--borde);
+  border-left: 4px solid var(--acento);
+  border-radius: 8px;
+  padding: 1rem 1.25rem;
+  margin: 1.5rem 0;
+}
+
+.destacado p:first-child { margin-top: 0; }
+.destacado p:last-child { margin-bottom: 0; }
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 1.25rem 0;
+  font-size: 0.9375rem;
+}
+
+/* Las tablas anchas scrollean solas en vez de romper la pagina en el telefono. */
+.tabla-scroll { overflow-x: auto; }
+
+th, td {
+  text-align: left;
+  padding: 0.625rem 0.75rem;
+  border-bottom: 1px solid var(--borde);
+  vertical-align: top;
+}
+
+th { font-weight: 600; color: var(--texto-tenue); }
+
+footer {
+  max-width: var(--ancho);
+  margin: 3rem auto 0;
+  padding-top: 1.5rem;
+  border-top: 1px solid var(--borde);
+  color: var(--texto-tenue);
+  font-size: 0.9375rem;
+}
+
+@media print {
+  :root { --fondo: #fff; --texto: #000; --texto-tenue: #333; --borde: #ccc; }
+  body { padding: 0; font-size: 11pt; }
+  a { color: #000; }
+}

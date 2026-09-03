@@ -22,10 +22,10 @@ class LoteriaCiudadRepository implements QuinielaRepository {
     LoteriaCiudadApi? api,
     CacheResultados? cache,
     DateTime Function()? reloj,
-  })  : _api = api ?? LoteriaCiudadApi(),
-        _cache = cache ?? CacheResultados(),
-        // Hora argentina, no la del telefono: ver reloj_argentina.dart.
-        _ahora = reloj ?? ahoraEnArgentina;
+  }) : _api = api ?? LoteriaCiudadApi(),
+       _cache = cache ?? CacheResultados(),
+       // Hora argentina, no la del telefono: ver reloj_argentina.dart.
+       _ahora = reloj ?? ahoraEnArgentina;
 
   /// Cuantas peticiones en paralelo contra el sitio oficial.
   ///
@@ -191,11 +191,11 @@ class LoteriaCiudadRepository implements QuinielaRepository {
           sorteosAnalizados: resultados.length,
         ),
     ]..sort((a, b) {
-        final porApariciones = b.apariciones.compareTo(a.apariciones);
-        return porApariciones != 0
-            ? porApariciones
-            : a.numero.compareTo(b.numero);
-      });
+      final porApariciones = b.apariciones.compareTo(a.apariciones);
+      return porApariciones != 0
+          ? porApariciones
+          : a.numero.compareTo(b.numero);
+    });
   }
 
   @override
@@ -234,8 +234,10 @@ class LoteriaCiudadRepository implements QuinielaRepository {
   Jugada generarJugada(int cifras) {
     assert(cifras >= 1 && cifras <= 4, 'La quiniela va de 1 a 4 cifras');
     final maximo = pow(10, cifras).toInt();
-    final numero =
-        _randomJugadas.nextInt(maximo).toString().padLeft(cifras, '0');
+    final numero = _randomJugadas
+        .nextInt(maximo)
+        .toString()
+        .padLeft(cifras, '0');
     return Jugada(numero: numero, generadaEn: _ahora());
   }
 
@@ -281,6 +283,7 @@ class LoteriaCiudadRepository implements QuinielaRepository {
 
     final resultados = <ResultadoSorteo>[];
     final porRed = <(Loteria, DateTime, TurnoSorteo)>[];
+    var huboFallo = false;
 
     for (final pedido in pedidos) {
       final clave = _clave(pedido);
@@ -315,9 +318,19 @@ class LoteriaCiudadRepository implements QuinielaRepository {
           case _Desenlace.fallo:
             // Transitorio (sin red, sitio caido): no se anota nada, se
             // reintenta en la proxima carga.
+            huboFallo = true;
             break;
         }
       }
+    }
+
+    // Una jornada genuinamente vacia (domingo, feriado) no es lo mismo que no
+    // haber podido consultar ninguna fuente. Sin esta distincion Resultados
+    // decia "no hay sorteos" y Estadisticas mostraba todos los numeros en 0.
+    if (resultados.isEmpty && huboFallo) {
+      throw const QuinielaApiException(
+        'No se pudo obtener ningun resultado de las fuentes disponibles',
+      );
     }
 
     return resultados;
@@ -363,8 +376,8 @@ class LoteriaCiudadRepository implements QuinielaRepository {
 
   (_Desenlace, ResultadoSorteo?) _desenlaceDe(ResultadoSorteo? resultado) =>
       resultado == null
-          ? (_Desenlace.sinSorteo, null)
-          : (_Desenlace.encontrado, resultado);
+      ? (_Desenlace.sinSorteo, null)
+      : (_Desenlace.encontrado, resultado);
 
   /// Numero de sorteo de una fecha y turno, segun el indice de la home.
   Future<String?> _sorteoDe({
@@ -373,7 +386,9 @@ class LoteriaCiudadRepository implements QuinielaRepository {
   }) async {
     final indice = await _obtenerIndice();
     return indice
-        .where((e) => e.turno == turno && _soloFecha(e.fecha) == _soloFecha(fecha))
+        .where(
+          (e) => e.turno == turno && _soloFecha(e.fecha) == _soloFecha(fecha),
+        )
         .firstOrNull
         ?.sorteo;
   }

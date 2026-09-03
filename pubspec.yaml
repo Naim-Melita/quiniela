@@ -2,7 +2,7 @@ name: quiniela
 description: "Quiniela24 - resultados oficiales de la quiniela argentina, generador de jugadas y estadisticas."
 publish_to: 'none'
 
-version: 1.0.0+1
+version: 1.0.0+20260820
 
 environment:
   sdk: ^3.12.1
