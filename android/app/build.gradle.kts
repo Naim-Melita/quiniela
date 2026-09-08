@@ -7,6 +7,20 @@ plugins {
     id("dev.flutter.flutter-gradle-plugin")
 }
 
+dependencies {
+    // Las plantillas nativas de google_mobile_ads usan widgets AppCompat.
+    implementation("androidx.appcompat:appcompat:1.7.1")
+
+    constraints {
+        // play-services-ads 25.4.0 arrastra Guava 31.1-android, afectada por
+        // CVE-2020-8908 y CVE-2023-2976. Esta es una version Android corregida
+        // y evita forzar la variante JRE dentro de la aplicacion movil.
+        implementation("com.google.guava:guava:32.1.3-android") {
+            because("evita vulnerabilidades de directorios temporales en Guava 31.1")
+        }
+    }
+}
+
 // Credenciales de firma de release.
 //
 // Viven en android/key.properties, que esta en .gitignore junto con los .jks:
