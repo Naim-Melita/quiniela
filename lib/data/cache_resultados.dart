@@ -95,7 +95,7 @@ class CacheResultados {
   }
 
   /// Version del formato en disco. La 1 era `{clave: resultado}` pelado.
-  static const _version = 2;
+  static const _version = 3;
 
   Future<void> _cargarDeDisco() async {
     try {
@@ -120,7 +120,9 @@ class CacheResultados {
       }
 
       final sinDatos = crudo['sinDatos'];
-      if (sinDatos is List) {
+      // La fuente anterior devolvia 404 para rutas retiradas: sus negativos
+      // no prueban ausencia de sorteos en la fuente actual.
+      if (crudo['version'] == _version && sinDatos is List) {
         _sinDatos.addAll(sinDatos.whereType<String>());
       }
     } catch (e) {

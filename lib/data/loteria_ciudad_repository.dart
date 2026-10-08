@@ -11,12 +11,9 @@ import 'reloj_argentina.dart';
 
 /// Repositorio contra la fuente oficial (Loteria de la Ciudad).
 ///
-/// Reparte el trabajo en dos vias segun la loteria: la Ciudad se resuelve con el
-/// extracto XML, direccionable por fecha y turno; el resto necesita el numero de
-/// sorteo del indice y sale del fragmento HTML. Ver [LoteriaCiudadApi].
-///
-/// Todo lo que se descarga pasa por [CacheResultados], porque un sorteo
-/// publicado es inmutable.
+/// Usa el indice oficial para resolver fecha y turno y consulta los datos
+/// actuales del sorteo. Todas las jurisdicciones comparten la misma descarga.
+/// Lo publicado se conserva en [CacheResultados].
 class LoteriaCiudadRepository implements QuinielaRepository {
   LoteriaCiudadRepository({
     LoteriaCiudadApi? api,
@@ -345,7 +342,7 @@ class LoteriaCiudadRepository implements QuinielaRepository {
     final (loteria, fecha, turno) = pedido;
     try {
       if (loteria.tieneExtractoXml) {
-        // null = 404 o extracto vacio: ese sorteo no existe.
+        // null = el indice no publica ese turno.
         final resultado = await _api.extractoXml(
           loteria: loteria,
           fecha: fecha,

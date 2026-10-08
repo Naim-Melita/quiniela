@@ -1,6 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:quiniela/data/loteria_ciudad_repository.dart';
 import 'package:quiniela/models/sorteo.dart';
+import 'package:quiniela/data/reloj_argentina.dart';
 
 /// Verificacion contra el sitio oficial EN VIVO.
 ///
@@ -19,9 +20,10 @@ void main() {
 
   test('trae el ultimo resultado de Nacional y Provincia', () async {
     final reloj = Stopwatch()..start();
-    final ultimos = await repo.ultimosResultados(
-      const [Loteria.nacional, Loteria.provincia],
-    );
+    final ultimos = await repo.ultimosResultados(const [
+      Loteria.nacional,
+      Loteria.provincia,
+    ]);
     reloj.stop();
 
     printOnFailure('tardo ${reloj.elapsedMilliseconds} ms');
@@ -47,8 +49,12 @@ void main() {
   }, timeout: const Timeout(Duration(minutes: 2)));
 
   test('trae la jornada completa de un dia habil pasado', () async {
-    // 12/08/2026 fue miercoles: tiene los 5 turnos de las dos loterias.
-    final resultados = await repo.resultadosDe(fecha: DateTime(2026, 8, 12));
+    // Una jornada completa reciente, dentro del indice disponible.
+    var fecha = ahoraEnArgentina().subtract(const Duration(days: 1));
+    while (fecha.weekday == DateTime.sunday) {
+      fecha = fecha.subtract(const Duration(days: 1));
+    }
+    final resultados = await repo.resultadosDe(fecha: fecha);
 
     for (final r in resultados) {
       // ignore: avoid_print
@@ -63,15 +69,16 @@ void main() {
       TurnoSorteo.values.toSet(),
       reason: 'faltan turnos de la jornada',
     );
-    expect(
-      resultados.map((r) => r.loteria).toSet(),
-      {Loteria.nacional, Loteria.provincia},
-    );
+    expect(resultados.map((r) => r.loteria).toSet(), {
+      Loteria.nacional,
+      Loteria.provincia,
+    });
   }, timeout: const Timeout(Duration(minutes: 2)));
 
   test('un dia sin sorteo (domingo) devuelve vacio, sin explotar', () async {
-    // 09/08/2026 fue domingo.
-    final resultados = await repo.resultadosDe(fecha: DateTime(2026, 8, 9));
+    final hoy = ahoraEnArgentina();
+    final domingo = hoy.subtract(Duration(days: hoy.weekday % 7));
+    final resultados = await repo.resultadosDe(fecha: domingo);
 
     // ignore: avoid_print
     print('domingo: ${resultados.length} resultados');

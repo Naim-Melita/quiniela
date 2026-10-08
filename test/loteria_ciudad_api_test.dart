@@ -14,6 +14,79 @@ String _fixture(String nombre) =>
     File('test/fixtures/$nombre').readAsStringSync();
 
 void main() {
+  test('lee el indice actual con fecha y turno explicitos', () {
+    final indice = LoteriaCiudadApi.parsearIndice(
+      _fixture('indice_actual.html'),
+    );
+    final primera = indice.firstWhere((e) => e.sorteo == '53008');
+    expect(primera.fecha, DateTime(2026, 10, 8));
+    expect(primera.turno, TurnoSorteo.primera);
+  });
+
+  test('consulta resultados actuales de Ciudad y Provincia', () async {
+    final api = LoteriaCiudadApi(
+      base: 'https://oficial.test',
+      cliente: MockClient((pedido) async {
+        if (pedido.url.path == '/') {
+          return http.Response.bytes(
+            utf8.encode(_fixture('indice_actual.html')),
+            200,
+          );
+        }
+        if (pedido.url.path == '/includes/resultados-data.php') {
+          return http.Response(_fixture('resultados_actuales.js'), 200);
+        }
+        return http.Response('ruta retirada', 404);
+      }),
+    );
+    final ciudad = await api.extractoXml(
+      loteria: Loteria.nacional,
+      fecha: DateTime(2026, 10, 8),
+      turno: TurnoSorteo.primera,
+    );
+    final provincia = await api.resultadoHtml(
+      loteria: Loteria.provincia,
+      fecha: DateTime(2026, 10, 8),
+      turno: TurnoSorteo.primera,
+      sorteo: '53008',
+    );
+    expect(ciudad!.cabeza, '4599');
+    expect(provincia!.cabeza, '1006');
+    expect(ciudad.numeros, hasLength(20));
+    expect(provincia.numeros, hasLength(20));
+  });
+
+  for (final caso in [
+    'fecha incorrecta',
+    'posicion duplicada',
+    'datos incompletos',
+  ]) {
+    test('rechaza resultados actuales con $caso', () async {
+      var cuerpo = _fixture('resultados_actuales.js');
+      if (caso == 'fecha incorrecta') {
+        cuerpo = cuerpo.replaceFirst('08\\/10\\/2026', '07\\/10\\/2026');
+      } else if (caso == 'posicion duplicada') {
+        cuerpo = cuerpo.replaceFirst('"pos":"02"', '"pos":"01"');
+      } else {
+        cuerpo = cuerpo.replaceFirst('{"pos":"20","val":"7675"}', '');
+      }
+      final api = LoteriaCiudadApi(
+        base: 'https://oficial.test',
+        cliente: MockClient((_) async => http.Response(cuerpo, 200)),
+      );
+      await expectLater(
+        api.resultadoHtml(
+          loteria: Loteria.nacional,
+          fecha: DateTime(2026, 10, 8),
+          turno: TurnoSorteo.primera,
+          sorteo: '53008',
+        ),
+        throwsA(isA<QuinielaApiException>()),
+      );
+      api.cerrar();
+    });
+  }
+
   group('fuentes de red', () {
     test(
       'si el proxy falla reintenta la misma ruta contra la fuente oficial',

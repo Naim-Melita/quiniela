@@ -1,3 +1,13 @@
+> Actualizacion 08/10/2026: la fuente oficial cambio. La app lee ahora el
+> selector `custom-option` de la home y consulta
+> `includes/resultados-data.php?sorteo=NUMERO`, que publica los resultados de
+> todas las jurisdicciones. Las rutas XML y POST descritas mas abajo son
+> historicas y ya no se usan. La ventana disponible depende del indice actual
+> (tambien para Ciudad). El cache v3 conserva resultados positivos y descarta
+> negativos antiguos causados por las rutas retiradas. El proxy nginx necesita
+> la ruta nueva de `deploy/nginx/fuente-loteria.conf`; mientras tanto Android
+> reintenta contra el sitio oficial.
+
 # Quiniela
 
 App Android de quiniela: resultados, generador de jugadas con diccionario de

@@ -29,24 +29,10 @@ class EntradaIndice {
   final TurnoSorteo turno;
 }
 
-/// Cliente del sitio oficial de Loteria de la Ciudad.
-///
-/// El sitio no tiene API documentada; esto se apoya en tres cosas que si son
-/// publicas y estables:
-///
-/// 1. `descarga.php?sorteo=YYYY/MM/QNL{jur}{turno}{YYYYMMDD}.xml` devuelve el
-///    **extracto oficial en XML**. Solo existe para la Ciudad (jurisdiccion 51),
-///    pero es la via mas robusta: no depende del HTML ni del numero de sorteo,
-///    se direcciona por fecha y turno.
-/// 2. `consultaResultados.php` (POST) devuelve un fragmento HTML con las 20
-///    posiciones. Es la unica via para Provincia y las demas jurisdicciones, y
-///    necesita el numero de sorteo.
-/// 3. La home trae el indice sorteo -> fecha de los ultimos ~26 dias, que es de
-///    donde sale ese numero de sorteo.
-///
-/// Al ser HTML sin contrato, el punto 2 se puede romper si el sitio cambia el
-/// marcado. Por eso los parsers validan lo que extraen y tiran
-/// [QuinielaApiException] en vez de devolver datos a medias.
+/// Cliente de la fuente oficial actual: la home publica fecha, turno y numero
+/// de sorteo; `includes/resultados-data.php` devuelve JSON dentro de una
+/// asignacion JavaScript con las 20 posiciones de todas las jurisdicciones.
+/// Los parsers XML/HTML anteriores se conservan para fixtures historicos.
 class LoteriaCiudadApi {
   LoteriaCiudadApi({
     http.Client? cliente,
@@ -62,7 +48,6 @@ class LoteriaCiudadApi {
   static const baseProxy = 'https://quiniela24.armelix.dev/fuente-loteria';
 
   /// Codigo de juego de la quiniela en `consultaResultados.php`.
-  static const _codigoJuego = '0080';
 
   final http.Client _cliente;
   final String _base;
@@ -82,7 +67,23 @@ class LoteriaCiudadApi {
   ///
   /// No se puede calcular el numero de sorteo por aritmetica sobre la fecha: los
   /// domingos no hay sorteo y la numeracion salta.
-  Future<List<EntradaIndice>> indiceSorteos() async {
+  Future<List<EntradaIndice>>? _indiceEnVuelo;
+  DateTime? _indiceHasta;
+  final Map<String, Future<String>> _datosEnVuelo = {};
+
+  Future<List<EntradaIndice>> indiceSorteos() {
+    if (_indiceEnVuelo != null && DateTime.now().isBefore(_indiceHasta!)) {
+      return _indiceEnVuelo!;
+    }
+    _datosEnVuelo.clear();
+    _indiceHasta = DateTime.now().add(const Duration(minutes: 10));
+    return _indiceEnVuelo = _descargarIndice().catchError((Object error) {
+      _indiceEnVuelo = null;
+      throw error;
+    });
+  }
+
+  Future<List<EntradaIndice>> _descargarIndice() async {
     // Sin aceptar404: si la home no responde, no hay nada que hacer.
     final html = await _get(Uri.parse('$_base/'));
     return parsearIndice(html!);
@@ -94,6 +95,26 @@ class LoteriaCiudadApi {
 
   /// Visible para tests: parsea el indice a partir del HTML de la home.
   static List<EntradaIndice> parsearIndice(String html) {
+    final actuales = RegExp(
+      r'''<li\b[^>]*data-value=["'](\d+)["'][^>]*>\s*(\d{2})/(\d{2})/(\d{4})\s*-\s*\d{2}:\d{2}\s*-\s*Sorteo N[º°]\s*\d+\s*-\s*([A-Z ]+)\s*</li>''',
+    );
+    final entradasActuales = <EntradaIndice>[];
+    for (final m in actuales.allMatches(html)) {
+      final turno = _turnoDesdeModalidad(m.group(5));
+      if (turno == null) throw const QuinielaApiException('Turno desconocido');
+      entradasActuales.add(
+        EntradaIndice(
+          sorteo: m.group(1)!,
+          fecha: DateTime(
+            int.parse(m.group(4)!),
+            int.parse(m.group(3)!),
+            int.parse(m.group(2)!),
+          ),
+          turno: turno,
+        ),
+      );
+    }
+    if (entradasActuales.isNotEmpty) return entradasActuales;
     final porFecha = <DateTime, List<int>>{};
 
     for (final m in _reOpcion.allMatches(html)) {
@@ -135,30 +156,29 @@ class LoteriaCiudadApi {
 
   // --- Resultados ---------------------------------------------------------
 
-  /// Extracto oficial en XML. Solo para la Ciudad.
-  ///
-  /// Devuelve null si el sorteo no existe (404), que es lo que pasa con una
-  /// fecha sin sorteo o un turno que todavia no se jugo.
+  /// Resultado de Ciudad por fecha y turno. Conserva el nombre publico anterior
+  /// para compatibilidad; consulta el endpoint actual, no la ruta XML retirada.
   Future<ResultadoSorteo?> extractoXml({
     required Loteria loteria,
     required DateTime fecha,
     required TurnoSorteo turno,
   }) async {
-    final aa = fecha.year.toString().padLeft(4, '0');
-    final mm = fecha.month.toString().padLeft(2, '0');
-    final dd = fecha.day.toString().padLeft(2, '0');
-    final archivo = 'QNL${loteria.jurisdiccion}${turno.letraExtracto}$aa$mm$dd';
-    final uri = Uri.parse(
-      '$_base/resultadosQuiniela/descarga.php?sorteo=$aa/$mm/$archivo.xml',
-    );
-
-    final xml = await _get(uri, aceptar404: true);
-    if (xml == null || xml.trim().isEmpty) return null;
-    return parsearExtractoXml(
-      xml,
+    final indice = await indiceSorteos();
+    final entrada = indice
+        .where(
+          (e) =>
+              e.fecha.year == fecha.year &&
+              e.fecha.month == fecha.month &&
+              e.fecha.day == fecha.day &&
+              e.turno == turno,
+        )
+        .firstOrNull;
+    if (entrada == null) return null;
+    return resultadoHtml(
       loteria: loteria,
-      fechaEsperada: fecha,
-      turnoEsperado: turno,
+      fecha: fecha,
+      turno: turno,
+      sorteo: entrada.sorteo,
     );
   }
 
@@ -224,32 +244,76 @@ class LoteriaCiudadApi {
     );
   }
 
-  /// Fragmento HTML con las 20 posiciones, para las jurisdicciones sin XML.
-  ///
-  /// Devuelve null cuando el sitio responde "No hay Sorteo ... para la fecha
-  /// ingresada", que es un caso normal (esa loteria no sorteo ese turno).
+  /// Resultado de una jurisdiccion desde los datos actuales del sorteo.
+  /// Conserva el nombre publico anterior para compatibilidad.
   Future<ResultadoSorteo?> resultadoHtml({
     required Loteria loteria,
     required DateTime fecha,
     required TurnoSorteo turno,
     required String sorteo,
   }) async {
-    final cuerpo = await _post(
-      Uri.parse('$_base/resultadosQuiniela/consultaResultados.php'),
-      {
-        'codigo': _codigoJuego,
-        'juridiccion': loteria.jurisdiccion,
-        'sorteo': sorteo,
-      },
-    );
-
-    return parsearFragmentoHtml(
-      cuerpo,
-      loteria: loteria,
-      fecha: fecha,
-      turno: turno,
-      sorteo: sorteo,
-    );
+    final cuerpo = await (_datosEnVuelo[sorteo] ??=
+        _get(
+          Uri.parse('$_base/includes/resultados-data.php?sorteo=$sorteo'),
+        ).then((value) => value!).catchError((Object error) {
+          _datosEnVuelo.remove(sorteo);
+          throw error;
+        }));
+    try {
+      final match = RegExp(
+        r'window\.RESULTADOS_DATA\s*=\s*(\[.*\])\s*;',
+        dotAll: true,
+      ).firstMatch(cuerpo);
+      if (match == null) throw const FormatException('Faltan los datos');
+      final datos = jsonDecode(match.group(1)!) as List;
+      final fila = datos
+          .cast<Map<String, dynamic>>()
+          .where((r) => '${r['sorteo']}' == sorteo)
+          .firstOrNull;
+      if (fila == null) throw const FormatException('Sorteo incorrecto');
+      final fechaTexto =
+          '${fecha.day.toString().padLeft(2, '0')}/${fecha.month.toString().padLeft(2, '0')}/${fecha.year}';
+      const modalidades = ['PREV', 'PRIM', 'MATU', 'VESP', 'NOCT'];
+      if (fila['fecha'] != fechaTexto ||
+          fila['modalidad'] != modalidades[turno.index]) {
+        throw const FormatException('Fecha o turno incorrectos');
+      }
+      final jurisdiccion =
+          (fila['jurisdicciones'] as Map)[loteria.jurisdiccion] as Map?;
+      if (jurisdiccion == null) {
+        _datosEnVuelo.remove(sorteo);
+        return null;
+      }
+      final posiciones = <int, String>{};
+      for (final n in jurisdiccion['numeros'] as List) {
+        final pos = int.parse('${n['pos']}');
+        final valor = '${n['val']}';
+        if (pos < 1 ||
+            pos > 20 ||
+            posiciones.containsKey(pos) ||
+            !RegExp(r'^\d{1,4}$').hasMatch(valor)) {
+          throw const FormatException('Posicion invalida');
+        }
+        posiciones[pos] = valor.padLeft(4, '0');
+      }
+      if (posiciones.length != 20) {
+        throw const FormatException('Faltan posiciones');
+      }
+      return ResultadoSorteo(
+        loteria: loteria,
+        fecha: DateTime(fecha.year, fecha.month, fecha.day),
+        turno: turno,
+        sorteo: sorteo,
+        letras: jurisdiccion['letras'] as String?,
+        numeros: [for (var p = 1; p <= 20; p++) posiciones[p]!],
+      );
+    } catch (e) {
+      _datosEnVuelo.remove(sorteo);
+      throw QuinielaApiException(
+        'Respuesta invalida para el sorteo $sorteo',
+        causa: e,
+      );
+    }
   }
 
   static final _rePosicion = RegExp(
@@ -332,28 +396,6 @@ class LoteriaCiudadApi {
     }
 
     if (aceptar404 && hubo404) return null;
-    throw QuinielaApiException(
-      'No se pudo conectar con $uri',
-      causa: ultimoError,
-    );
-  }
-
-  Future<String> _post(Uri uri, Map<String, String> campos) async {
-    Object? ultimoError;
-    for (final candidata in _candidatas(uri)) {
-      try {
-        final respuesta = await _cliente
-            .post(candidata, body: campos)
-            .timeout(timeout);
-        if (respuesta.statusCode == 200) return _decodificar(respuesta);
-        ultimoError = QuinielaApiException(
-          '$candidata respondio ${respuesta.statusCode}',
-        );
-      } catch (e) {
-        ultimoError = e;
-      }
-    }
-
     throw QuinielaApiException(
       'No se pudo conectar con $uri',
       causa: ultimoError,
